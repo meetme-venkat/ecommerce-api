@@ -33,6 +33,9 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
+        if (categoryRepository.findByName(request.getName()).isPresent()) {
+            throw new DuplicateResourceException("Category", "name", request.getName());
+        }
         if (categoryRepository.findBySlug(request.getSlug()).isPresent()) {
             throw new DuplicateResourceException("Category", "slug", request.getSlug());
         }
@@ -50,6 +53,11 @@ public class CategoryService {
     @Transactional
     public CategoryResponse update(Long id, CategoryRequest request) {
         Category category = getCategory(id);
+        categoryRepository.findByName(request.getName())
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> {
+                    throw new DuplicateResourceException("Category", "name", request.getName());
+                });
         categoryRepository.findBySlug(request.getSlug())
                 .filter(existing -> !existing.getId().equals(id))
                 .ifPresent(existing -> {
