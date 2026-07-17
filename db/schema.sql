@@ -4,6 +4,8 @@ CREATE DATABASE ecommerce_db
     TEMPLATE = template0
     ENCODING = 'UTF8';
 
+\c ecommerce_db
+
 SELECT current_database();
 
 
