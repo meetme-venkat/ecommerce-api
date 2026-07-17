@@ -16,11 +16,18 @@ import com.venkat.ecommerce.api.exception.ResourceNotFoundException;
 import com.venkat.ecommerce.api.repository.CustomerRepository;
 import com.venkat.ecommerce.api.repository.OrderRepository;
 import com.venkat.ecommerce.api.repository.ProductRepository;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -47,6 +54,22 @@ class OrderServiceTest {
 
     @InjectMocks
     private OrderService orderService;
+
+    private ListAppender<ILoggingEvent> logAppender;
+
+    @BeforeEach
+    void attachLogAppender() {
+        Logger logger = (Logger) LoggerFactory.getLogger(OrderService.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        logger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void detachLogAppender() {
+        Logger logger = (Logger) LoggerFactory.getLogger(OrderService.class);
+        logger.detachAppender(logAppender);
+    }
 
     private Customer customer() {
         return Customer.builder().id(1L).firstName("John").lastName("Doe").build();
@@ -137,6 +160,40 @@ class OrderServiceTest {
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("Insufficient stock");
         verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void should_logLowStockWarning_when_remainingStockFallsBelowThreshold() {
+        // Arrange
+        Product product = product(12);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer()));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        orderService.create(orderRequest(5)); // 12 - 5 = 7, below threshold of 10
+
+        // Assert
+        assertThat(logAppender.list).anySatisfy(event -> {
+            assertThat(event.getLevel()).isEqualTo(Level.WARN);
+            assertThat(event.getFormattedMessage())
+                    .isEqualTo("Low stock alert: Wireless Mouse has 7 units left");
+        });
+    }
+
+    @Test
+    void should_notLogLowStockWarning_when_remainingStockStaysAtOrAboveThreshold() {
+        // Arrange
+        Product product = product(150);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer()));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        orderService.create(orderRequest(5)); // 150 - 5 = 145, above threshold
+
+        // Assert
+        assertThat(logAppender.list).noneMatch(event -> event.getLevel() == Level.WARN);
     }
 
     @Test

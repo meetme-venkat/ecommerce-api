@@ -18,6 +18,7 @@ import com.venkat.ecommerce.api.repository.CustomerRepository;
 import com.venkat.ecommerce.api.repository.OrderRepository;
 import com.venkat.ecommerce.api.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +30,11 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class OrderService {
+
+    private static final int LOW_STOCK_THRESHOLD = 10;
 
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
@@ -107,6 +111,15 @@ public class OrderService {
         }
 
         order.setTotalAmount(total);
+
+        // Warn (do not fail) when an order leaves a product's stock running low.
+        for (OrderItem item : order.getItems()) {
+            Product product = item.getProduct();
+            if (product.getStockQuantity() < LOW_STOCK_THRESHOLD) {
+                log.warn("Low stock alert: {} has {} units left",
+                        product.getName(), product.getStockQuantity());
+            }
+        }
 
         Payment payment = Payment.builder()
                 .paymentMethod(request.getPaymentMethod())
