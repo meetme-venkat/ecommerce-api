@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "pre-launch-implicit",
+  "prompt": "before this goes live i want to make sure nothing embarrassing is gonna blow up on us — like leaked passwords, some race condition that lets people order stuff we don't have, that kind of thing. can you audit the codebase and lay out what needs fixing first?",
+  "assertions": [
+    {"text": "Produces a structured severity-graded readiness report (recognizes the intent despite no explicit 'production readiness' phrase)", "type": "qualitative"},
+    {"text": "Identifies the blank Postgres datasource password as a critical config finding", "type": "qualitative"},
+    {"text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding", "type": "qualitative"},
+    {"text": "Lays out what to fix first, ordered by severity (criticals before warnings)", "type": "qualitative"},
+    {"text": "Every finding cites a concrete file:line location", "type": "qualitative"},
+    {"text": "Does NOT wrongly flag ddl-auto=validate as a production risk (validate is correct for prod)", "type": "qualitative"}
+  ]
+}

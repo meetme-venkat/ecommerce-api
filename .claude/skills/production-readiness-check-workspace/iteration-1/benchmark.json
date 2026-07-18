@@ -1,0 +1,363 @@
+{
+  "metadata": {
+    "skill_name": "production-readiness-check",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-07-18T14:17:59Z",
+    "evals_run": [
+      0,
+      1,
+      2
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 192.5,
+        "tokens": 74109,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Gives a clear NOT READY / no-go verdict prominently",
+          "passed": true,
+          "evidence": "Line 3: '**Verdict: NOT READY \u2014 2 critical, 5 warning, 3 info**' as the first line under the title."
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "Critical bullet [config], application.properties:5 \u2014 'Blank datasource password committed'."
+        },
+        {
+          "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "Critical bullet [concurrency], OrderService.java:93 \u2014 'read-check-write on stockQuantity with no lock'."
+        },
+        {
+          "text": "Every finding cites a concrete file:line location",
+          "passed": true,
+          "evidence": "All 10 findings carry a clickable File.java:LINE link; Passed items reference lines too."
+        },
+        {
+          "text": "Findings are grouped by severity (critical / warning / info)",
+          "passed": true,
+          "evidence": "Explicit \ud83d\udd34 Critical / \ud83d\udfe0 Warning / \ud83d\udd35 Info / \u2705 Passed sections."
+        },
+        {
+          "text": "Does NOT wrongly flag ddl-auto=validate as a production risk",
+          "passed": true,
+          "evidence": "Line 37 lists ddl-auto=validate under Passed as 'correct for prod'."
+        },
+        {
+          "text": "Credits at least one genuinely clean area as passed",
+          "passed": true,
+          "evidence": "Passed section credits transactions, dto boundary, and validation as clean."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 333.4,
+        "tokens": 81824,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Produces a structured severity-graded readiness report despite no explicit phrase",
+          "passed": true,
+          "evidence": "Full Verdict + \ud83d\udd34/\ud83d\udfe0/\ud83d\udd35/\u2705 report produced from a casual 'before this goes live' prompt."
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "Critical [config] at application.properties:5 \u2014 'DB password is blank and hardcoded'."
+        },
+        {
+          "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "Critical [concurrency] at OrderService.java:93 \u2014 unguarded read-check-write."
+        },
+        {
+          "text": "Lays out what to fix first, ordered by severity",
+          "passed": true,
+          "evidence": "Verdict line names the two criticals to fix first; offer text groups mechanical vs judgment fixes in severity order."
+        },
+        {
+          "text": "Every finding cites a concrete file:line location",
+          "passed": true,
+          "evidence": "Every bullet across Critical/Warning/Info carries a File.java:LINE link."
+        },
+        {
+          "text": "Does NOT wrongly flag ddl-auto=validate as a production risk",
+          "passed": true,
+          "evidence": "Line 38: ddl-auto=validate credited under Passed (schema safety)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 266.3,
+        "tokens": 75791,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Report addresses all five areas (config, transactions, web layer, concurrency)",
+          "passed": true,
+          "evidence": "Findings/Passed cover config, transactions, dto, validation, error-handling, n+1, and concurrency/data-integrity."
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "Critical [config] at application.properties:5 \u2014 blank hardcoded password, must be rotated."
+        },
+        {
+          "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "Critical [concurrency] at OrderService.java:93 \u2014 oversell race."
+        },
+        {
+          "text": "A go/no-go verdict appears at the top of the report",
+          "passed": true,
+          "evidence": "Line 3: '**Verdict: NOT READY \u2014 2 critical, 6 warning, 3 info**' at the top."
+        },
+        {
+          "text": "Ends by offering to fix (severity order) and does NOT edit repo files yet",
+          "passed": true,
+          "evidence": "Closing offer lists fixes in severity order and asks which to take; agent confirmed no source files modified."
+        },
+        {
+          "text": "Flags at least one N+1 query risk as a warning",
+          "passed": true,
+          "evidence": "Three \ud83d\udfe0 [n+1] warnings: OrderService.findAll, ProductService, ReviewService."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8571,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 167.8,
+        "tokens": 58840,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Gives a clear NOT READY / no-go verdict prominently",
+          "passed": true,
+          "evidence": "'## Verdict: NO-GO for Friday' near the top."
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "Blocker #4: 'username=postgres and an empty password' listed as a hard blocker."
+        },
+        {
+          "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "Blocker #2: race condition in OrderService.create(), cites OrderService.java:87-100."
+        },
+        {
+          "text": "Every finding cites a concrete file:line location",
+          "passed": false,
+          "evidence": "Only some findings cite lines (OrderService.java:87-100). The auth blocker, config issues, migration/actuator findings reference files/dirs but no line numbers."
+        },
+        {
+          "text": "Findings are grouped by severity (critical / warning / info)",
+          "passed": true,
+          "evidence": "Grouped as Blockers / Major issues / Minor / follow-ups \u2014 a severity ordering."
+        },
+        {
+          "text": "Does NOT wrongly flag ddl-auto=validate as a production risk",
+          "passed": true,
+          "evidence": "Line 52: 'ddl-auto=validate is the right choice'."
+        },
+        {
+          "text": "Credits at least one genuinely clean area as passed",
+          "passed": true,
+          "evidence": "'What's genuinely good' section credits DTO coverage and @Transactional coverage."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 164.6,
+        "tokens": 57799,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Produces a structured severity-graded readiness report despite no explicit phrase",
+          "passed": true,
+          "evidence": "Verdict + Critical/Warnings/Passed structure produced."
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "C1 'Database has a blank password' at application.properties:3-5."
+        },
+        {
+          "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "C2 'Stock oversell race condition' at OrderService.java:93-100."
+        },
+        {
+          "text": "Lays out what to fix first, ordered by severity",
+          "passed": true,
+          "evidence": "'Suggested fix order: 1. C1 -> 2. C2 -> 3. C3 -> then W1-W4'."
+        },
+        {
+          "text": "Every finding cites a concrete file:line location",
+          "passed": false,
+          "evidence": "Criticals cite lines, but W4 (actuator) and parts of C3 (auth) reference files/pom.xml without line numbers."
+        },
+        {
+          "text": "Does NOT wrongly flag ddl-auto=validate as a production risk",
+          "passed": true,
+          "evidence": "W1 explicitly notes 'ddl-auto=validate on line 7 is the correct, safe choice \u2014 good.'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.6667,
+        "passed": 4,
+        "failed": 2,
+        "total": 6,
+        "time_seconds": 405.1,
+        "tokens": 86234,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Report addresses all five areas (config, transactions, web layer, concurrency)",
+          "passed": true,
+          "evidence": "Covers configuration, transactions, web layer, concurrency, persistence/N+1, validation."
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": false,
+          "evidence": "The blank/hardcoded DB password is rated Medium (M2), not Critical \u2014 under-calibrated for a blank prod superuser password."
+        },
+        {
+          "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "C1 'Stock can be oversold under concurrent orders', cites OrderService.create() lines 87-100."
+        },
+        {
+          "text": "A go/no-go verdict appears at the top of the report",
+          "passed": false,
+          "evidence": "Leads with a Summary and severity counts (2 Critical / 5 High / 6 Medium / 4 Low) but never states an explicit go/no-go / ship-or-not verdict."
+        },
+        {
+          "text": "Ends by offering to fix (severity order) and does NOT edit repo files yet",
+          "passed": true,
+          "evidence": "Ends 'Tell me which of these you want fixed and I'll implement them'; suggested fix order present; no files modified."
+        },
+        {
+          "text": "Flags at least one N+1 query risk as a warning",
+          "passed": true,
+          "evidence": "H4 'N+1 queries on list/read paths' (rated High rather than Warning, but flagged)."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 264.0667,
+        "stddev": 70.4765,
+        "min": 192.5,
+        "max": 333.4
+      },
+      "tokens": {
+        "mean": 77241.3333,
+        "stddev": 4056.8345,
+        "min": 74109,
+        "max": 81824
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.7857,
+        "stddev": 0.1037,
+        "min": 0.6667,
+        "max": 0.8571
+      },
+      "time_seconds": {
+        "mean": 245.8333,
+        "stddev": 137.9383,
+        "min": 164.6,
+        "max": 405.1
+      },
+      "tokens": {
+        "mean": 67624.3333,
+        "stddev": 16124.847,
+        "min": 57799,
+        "max": 86234
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.21",
+      "time_seconds": "+18.2",
+      "tokens": "+9617"
+    }
+  },
+  "notes": []
+}

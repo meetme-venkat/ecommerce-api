@@ -1,0 +1,41 @@
+{
+  "run_id": "eval-1-with_skill",
+  "expectations": [
+    {
+      "text": "Produces a structured severity-graded readiness report despite no explicit phrase",
+      "passed": true,
+      "evidence": "Full Verdict + \ud83d\udd34/\ud83d\udfe0/\ud83d\udd35/\u2705 report produced from a casual 'before this goes live' prompt."
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "passed": true,
+      "evidence": "Critical [config] at application.properties:5 \u2014 'DB password is blank and hardcoded'."
+    },
+    {
+      "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+      "passed": true,
+      "evidence": "Critical [concurrency] at OrderService.java:93 \u2014 unguarded read-check-write."
+    },
+    {
+      "text": "Lays out what to fix first, ordered by severity",
+      "passed": true,
+      "evidence": "Verdict line names the two criticals to fix first; offer text groups mechanical vs judgment fixes in severity order."
+    },
+    {
+      "text": "Every finding cites a concrete file:line location",
+      "passed": true,
+      "evidence": "Every bullet across Critical/Warning/Info carries a File.java:LINE link."
+    },
+    {
+      "text": "Does NOT wrongly flag ddl-auto=validate as a production risk",
+      "passed": true,
+      "evidence": "Line 38: ddl-auto=validate credited under Passed (schema safety)."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  }
+}

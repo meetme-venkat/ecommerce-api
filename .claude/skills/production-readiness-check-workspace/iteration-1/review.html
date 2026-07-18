@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "production-readiness-check", "runs": [{"id": "eval-0-with_skill-run-1", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "report.md", "type": "text", "content": "# Production Readiness Report\n\n**Verdict: NOT READY \u2014 2 critical, 5 warning, 3 info**\nFix the stock-oversell race in `OrderService.create` and get the DB password out of the config file before this goes anywhere near prod.\n\n## \ud83d\udd34 Critical\n- **[concurrency]** Stock oversell: read-check-write on `stockQuantity` with no lock, no `@Version`, and no atomic DB update. Two concurrent orders for the same product both read the old stock, both pass the check, both decrement \u2014 stock goes negative and you oversell. \u2014 [`OrderService.java:93`](src/main/java/com/venkat/ecommerce/api/service/OrderService.java#L93)\n  Fix: make the decrement atomic in the DB (`UPDATE products SET stock_quantity = stock_quantity - :qty WHERE id = :id AND stock_quantity >= :qty`, check rows-affected and throw if 0), or add `@Version` optimistic locking with retry, or a `@Lock(PESSIMISTIC_WRITE)` finder on the hot path. The same read-modify-write shape in `cancel()` (line 167) should move to an atomic increment too.\n- **[config]** Blank datasource password committed in config; username hardcoded, nothing externalized. A blank DB password means the database is protected only by network reachability. \u2014 [`application.properties:5`](src/main/resources/application.properties#L5)\n  Fix: reference an env var / secrets manager (`spring.datasource.password=${DB_PASSWORD}`, `spring.datasource.username=${DB_USERNAME}`) and set a real password on the prod DB. If this DB has ever run with the blank password, treat the credential as compromised and set/rotate it \u2014 removing the line does not undo git history.\n\n## \ud83d\udfe0 Warning\n- **[n+1]** `findAll` maps each order through `toResponse`, touching lazy `items`, `item.getProduct()`, `customer`, and `payment` \u2014 one extra SELECT per association per order on an unbounded list endpoint. \u2014 [`OrderService.java:58`](src/main/java/com/venkat/ecommerce/api/service/OrderService.java#L58)\n  Fix: add a `@Query` with `join fetch` (items + product + customer) or an `@EntityGraph` finder; use `@BatchSize` on the collections. Only one collection can be join-fetched per query.\n- **[n+1]** `findAll` maps each product through `toResponse`, which reads `product.getCategory().getName()` \u2014 lazy `@ManyToOne` fires one SELECT per product row. \u2014 [`ProductService.java:26`](src/main/java/com/venkat/ecommerce/api/service/ProductService.java#L26)\n  Fix: `@EntityGraph(attributePaths = \"category\")` on the finder, or a `join fetch` query.\n- **[n+1]** `findByProduct` reads `review.getCustomer()` per review in `toResponse` \u2014 one SELECT per review for a product that may have many. \u2014 [`ReviewService.java:50`](src/main/java/com/venkat/ecommerce/api/service/ReviewService.java#L50)\n  Fix: `join fetch r.customer` in `findByProductIdOrderByCreatedAtDesc`, or an `@EntityGraph`.\n- **[config]** `show-sql=true` / `format_sql=true` with no dev/prod profile separation \u2014 every SQL statement (and its bound values) hits prod logs: noise plus potential data leakage. \u2014 [`application.properties:8`](src/main/resources/application.properties#L8)\n  Fix: set both to `false` in the default/prod config and gate them behind a `dev` profile.\n- **[data-integrity]** The \"stock never goes negative\" invariant lives only in Java; the `products` table has no `CHECK (stock_quantity >= 0)` backstop, so if the app check is bypassed or loses the race the DB still accepts negative stock. \u2014 [`schema.sql:41`](db/schema.sql#L41)\n  Fix: add `CONSTRAINT chk_products_stock CHECK (stock_quantity >= 0)` so the database refuses bad data regardless of app logic.\n\n## \ud83d\udd35 Info\n- **[error-handling]** The advice maps the four known exceptions but has no catch-all `@ExceptionHandler(Exception.class)`. Any unexpected exception (including the `DataIntegrityViolationException` from a concurrent duplicate insert) falls through to Spring's default handling and breaks the consistent `ErrorResponse` contract. \u2014 [`GlobalExceptionHandler.java:16`](src/main/java/com/venkat/ecommerce/api/exception/GlobalExceptionHandler.java#L16)\n  Fix: add a fallback handler returning a generic 500 body with no exception text or stack trace.\n- **[concurrency]** Check-then-insert for uniqueness (`findByEmail`/`findBySku`/`findByName`/`findBySlug` then `save`) is racy, but each is backed by a DB unique constraint so the second insert fails cleanly rather than duplicating. \u2014 [`CustomerService.java:36`](src/main/java/com/venkat/ecommerce/api/service/CustomerService.java#L36)\n  Fix: rely on the unique constraint and translate the resulting violation to a 409 (ties into the catch-all handler above).\n- **[concurrency]** No `@Version` on any updatable entity (`Product`, `Order`, `Payment`), so concurrent updates to the same row silently lose-update. \u2014 [`Product.java:28`](src/main/java/com/venkat/ecommerce/api/entity/Product.java#L28)\n  Fix: add a `@Version` field to contended entities and handle `OptimisticLockException` with a retry.\n\n## \u2705 Passed\n- transactions: every write method (`create`/`update`/`delete`/`updateStatus`/`cancel`) is `@Transactional`; all read paths use `@Transactional(readOnly = true)`. No dirty-checking write left uncovered.\n- dto: every controller handler returns a `*Response` DTO or `ResponseEntity<Void>` \u2014 no entity, `List<Entity>`, or `Page<Entity>` leaks, and no entity is bound as `@RequestBody`.\n- validation: `@Valid` on all request bodies, nested `@Valid` on order items; DTO fields carry appropriate `@NotNull`/`@NotBlank`/`@Email`/`@Size`/`@Min`/`@Max`/`@PositiveOrZero` constraints.\n- error-handling: `@RestControllerAdvice` maps business/validation exceptions to correct status codes (404, 409, 422, 400) with a structured body \u2014 no stack traces or raw messages beyond controlled business text.\n- config: `spring.jpa.hibernate.ddl-auto=validate` \u2014 correct for prod, no schema-mutating or drop-on-boot setting.\n\n---\n\n**Want me to fix these? I'd start with the two critical items.** Note which is which before you say go:\n\n- Mechanical / low-risk: add the `CHECK (stock_quantity >= 0)` constraint, flip `show-sql`/`format_sql` off behind a profile, add the catch-all exception handler, add `@EntityGraph`/`join fetch` for the three N+1 endpoints.\n- Needs judgment / behavior change: the oversell fix (atomic decrement vs. optimistic vs. pessimistic locking \u2014 I'd recommend the conditional atomic `UPDATE`), adding `@Version` fields, and externalizing the datasource credentials. The blank password is a config + secrets change, not just a code edit \u2014 it must be **set and rotated on the actual database**, since a code change can't un-leak a credential that's already in git history.\n"}], "grading": {"run_id": "eval-0-with_skill", "expectations": [{"text": "Gives a clear NOT READY / no-go verdict prominently", "passed": true, "evidence": "Line 3: '**Verdict: NOT READY \u2014 2 critical, 5 warning, 3 info**' as the first line under the title."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "Critical bullet [config], application.properties:5 \u2014 'Blank datasource password committed'."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "Critical bullet [concurrency], OrderService.java:93 \u2014 'read-check-write on stockQuantity with no lock'."}, {"text": "Every finding cites a concrete file:line location", "passed": true, "evidence": "All 10 findings carry a clickable File.java:LINE link; Passed items reference lines too."}, {"text": "Findings are grouped by severity (critical / warning / info)", "passed": true, "evidence": "Explicit \ud83d\udd34 Critical / \ud83d\udfe0 Warning / \ud83d\udd35 Info / \u2705 Passed sections."}, {"text": "Does NOT wrongly flag ddl-auto=validate as a production risk", "passed": true, "evidence": "Line 37 lists ddl-auto=validate under Passed as 'correct for prod'."}, {"text": "Credits at least one genuinely clean area as passed", "passed": true, "evidence": "Passed section credits transactions, dto boundary, and validation as clean."}], "summary": {"passed": 7, "failed": 0, "total": 7, "pass_rate": 1.0}}}, {"id": "eval-0-without_skill-run-1", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "report.md", "type": "text", "content": "# Production Readiness Review \u2014 ecommerce-api\n\n## Verdict: NO-GO for Friday\n\nDo not ship this to production on Friday. This is a clean, well-structured codebase, but it is missing several things that are non-negotiable for a public-facing ecommerce API. At least four of them are hard blockers, and any one of them alone is enough to hold the release. The good news: none are deep design flaws, and the fixes are well-understood.\n\n---\n\n## Blockers (must fix before any prod deploy)\n\n### 1. There is no authentication or authorization \u2014 every endpoint is public\n`pom.xml` pulls in web, JPA, validation, actuator, and springdoc \u2014 but **not** `spring-boot-starter-security`. There is no security config anywhere (`config/` contains only `OpenApiConfig`). That means, once deployed, anyone on the network can:\n\n- `DELETE /api/v1/products/{id}` and `DELETE /api/v1/categories/{id}` \u2014 delete your catalog.\n- `GET /api/v1/customers` \u2014 read every customer's name, email, phone, and address (PII exposure / likely a compliance violation).\n- `POST /api/v1/orders`, cancel orders, mutate order status \u2014 for any customer.\n\nFor an ecommerce API this is a categorical no-go. Needs authentication (API keys / OAuth2 / JWT) and role-based authorization on mutating and PII endpoints before it faces prod traffic.\n\n### 2. Stock can be oversold under concurrent orders (race condition)\n`OrderService.create()` (src/main/java/.../service/OrderService.java:87-100) does a read-modify-write on `product.stockQuantity`:\n\n```java\nif (product.getStockQuantity() < itemRequest.getQuantity()) { throw ... }\nproduct.setStockQuantity(product.getStockQuantity() - itemRequest.getQuantity());\n```\n\nThere is no optimistic locking (`Product` has no `@Version` field), no pessimistic lock, and no atomic DB-side decrement. Two orders placed at the same time for the last unit will both pass the check and both succeed \u2014 you oversell. On an ecommerce launch this *will* happen. Fix with a `@Version` column, a `SELECT ... FOR UPDATE`, or a conditional `UPDATE ... WHERE stock_quantity >= ?`.\n\n### 3. N+1 queries + unbounded result sets on the list endpoints\nAll the list reads will fall over as data grows because every relationship is `LAZY` and the `toResponse` mappers walk them:\n\n- `OrderService.findAll()` \u2192 `toResponse()` touches `order.getItems()`, each `item.getProduct()`, `order.getCustomer()`, and `order.getPayment()` \u2014 all lazy. One query to load orders, then several per order. `OrderRepository` has no `JOIN FETCH`.\n- `ProductService.findAll()` \u2192 `toResponse()` touches `product.getCategory()` (lazy) \u2014 N+1.\n- `ReviewService.findByProduct()` \u2192 `toResponse()` touches `review.getCustomer()` / `getProduct()` \u2014 N+1.\n\nCompounding it: **none of the `findAll` endpoints are paginated** \u2014 `GET /api/v1/orders` and `GET /api/v1/products` return the entire table every call. With real production volume this is both a latency and a memory problem. Fix with `JOIN FETCH` / entity graphs and `Pageable`.\n\n### 4. Production configuration is not production-ready\n`src/main/resources/application.properties`:\n\n- Datasource is hardcoded to `jdbc:postgresql://localhost:5432/ecommerce_db` with `username=postgres` and an **empty password** \u2014 no externalized config, no prod profile (`application-prod.properties` does not exist), no secret management.\n- `spring.jpa.show-sql=true` \u2014 every SQL statement logged in prod: noise, overhead, and potential data leakage in logs.\n- No connection-pool sizing, timeouts, or other prod tuning.\n\nExternalize DB/credentials via environment variables or a secrets store, add a prod profile, and turn off SQL logging before shipping.\n\n---\n\n## Major issues (should fix before, or immediately after with a plan)\n\n- **No database migration tooling.** No Flyway/Liquibase. `spring.jpa.hibernate.ddl-auto=validate` is the right choice, but the schema is applied by hand from `db/schema.sql` \u2014 and that file begins with `DROP DATABASE IF EXISTS ecommerce_db;`. If that script is ever pointed at prod, it wipes everything. There is no versioned, forward-only migration path. This is a serious operational hazard for a Friday deploy.\n- **Exception handling has gaps that produce 500s + stack traces.** `GlobalExceptionHandler` covers the custom exceptions and validation, but has no fallback for generic `Exception` or for `DataIntegrityViolationException`. Concurrent duplicate inserts (e.g. two customers with the same email, or an `order_number` collision) will race past the app-level checks and surface as raw 500s. Add a catch-all and a data-integrity handler.\n- **Actuator is on the classpath with no security.** With no security starter, management endpoints have no protection layer. Lock down / restrict actuator exposure explicitly.\n\n---\n\n## Minor / follow-ups (not blockers)\n\n- `order_number` is generated from 8 hex chars of a UUID (`Order.generateOrderNumber()`), on a `UNIQUE` column with no retry \u2014 a collision (unlikely but possible at scale) becomes a 500 with no recovery.\n- Test coverage is service-layer unit tests only. No web-layer (`MockMvc`) or persistence (`@DataJpaTest`) tests, so entity/schema drift and controller wiring are unverified. Build/test pass status was not run as part of this read-only review.\n- Payments are always created `PENDING` with no real processing \u2014 confirm this stub is intended for launch.\n- No CORS configuration \u2014 confirm whether a browser client needs it.\n\n---\n\n## What's genuinely good\n\n- Consistent layering (controller -> service -> repository), constructor injection, `final` fields.\n- **DTO coverage is clean** \u2014 every `@RestController` method returns a DTO / `List<DTO>` / `ResponseEntity<DTO>`; no entities leak across the API boundary.\n- **`@Transactional` coverage is correct** \u2014 every DB-writing service method is transactional; reads use `readOnly = true`.\n- Money is `BigDecimal` throughout; DB uses `NUMERIC`.\n- Solid DB constraints (FKs, unique keys, check constraints) and sensible indexes in `schema.sql`.\n- Order-status transitions are modeled explicitly and validated; cancellation correctly restores stock and refunds.\n\n---\n\n## Bottom line\n**NO-GO.** Ship-blockers are: (1) no authN/authZ on any endpoint, (2) oversell race in order creation, (3) N+1 + unpaginated list endpoints, (4) non-production config with a plaintext empty DB password and SQL logging on. Add to that the lack of migration tooling and a destructive `schema.sql`. Close the four blockers and put a real migration path in place, then re-review \u2014 the underlying code quality is good, so this is achievable, but not by Friday without cutting corners you shouldn't cut on a payments-adjacent system.\n"}], "grading": {"run_id": "eval-0-without_skill", "expectations": [{"text": "Gives a clear NOT READY / no-go verdict prominently", "passed": true, "evidence": "'## Verdict: NO-GO for Friday' near the top."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "Blocker #4: 'username=postgres and an empty password' listed as a hard blocker."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "Blocker #2: race condition in OrderService.create(), cites OrderService.java:87-100."}, {"text": "Every finding cites a concrete file:line location", "passed": false, "evidence": "Only some findings cite lines (OrderService.java:87-100). The auth blocker, config issues, migration/actuator findings reference files/dirs but no line numbers."}, {"text": "Findings are grouped by severity (critical / warning / info)", "passed": true, "evidence": "Grouped as Blockers / Major issues / Minor / follow-ups \u2014 a severity ordering."}, {"text": "Does NOT wrongly flag ddl-auto=validate as a production risk", "passed": true, "evidence": "Line 52: 'ddl-auto=validate is the right choice'."}, {"text": "Credits at least one genuinely clean area as passed", "passed": true, "evidence": "'What's genuinely good' section credits DTO coverage and @Transactional coverage."}], "summary": {"passed": 6, "failed": 1, "total": 7, "pass_rate": 0.8571}}}, {"id": "eval-1-with_skill-run-1", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "report.md", "type": "text", "content": "# Production Readiness Report\n\n**Verdict: NOT READY \u2014 2 critical, 6 warning, 3 info**\nFix the stock oversell race in `OrderService.create` and set a real, externalized DB password before this ships \u2014 both are exactly the \"blow up on us\" cases you called out.\n\n## \ud83d\udd34 Critical\n- **[concurrency]** Stock is decremented with an unguarded read-check-write: the method reads `stockQuantity`, compares it to the requested quantity, then writes `current - qty` with no lock, no `@Version`, and no atomic DB update. Two concurrent orders both read the same stock and both pass the check \u2192 oversell / negative stock. \u2014 [`OrderService.java:93`](src/main/java/com/venkat/ecommerce/api/service/OrderService.java#L93)\n  Fix: make the decrement atomic in the DB \u2014 `UPDATE products SET stock_quantity = stock_quantity - :qty WHERE id = :id AND stock_quantity >= :qty` and reject the item if 0 rows were updated \u2014 or add `@Version` to `Product` and retry on `OptimisticLockException`, or `@Lock(PESSIMISTIC_WRITE)` on the product load. (Behavior change \u2014 needs judgment; not a one-line mechanical fix.)\n- **[config]** DB password is blank *and* hardcoded \u2014 `spring.datasource.password=` with `username=postgres`, none externalized. A blank production DB password means the database is protected only by network reachability. \u2014 [`application.properties:5`](src/main/resources/application.properties#L5)\n  Fix: set a strong password and inject it from the environment: `spring.datasource.password=${DB_PASSWORD}` (same for URL/username). Since it is blank, there is nothing to rotate \u2014 but do not commit the real value; keep it in an env var / secrets manager.\n\n## \ud83d\udfe0 Warning\n- **[n+1]** `findAll()` loads every order, then `toResponse` walks four lazy associations per row \u2014 `getItems()`, `getCustomer()`, each item's `getProduct()`, and `getPayment()` (`@OneToOne` inverse). On the orders list endpoint this is a query storm that melts under load. \u2014 [`OrderService.java:59`](src/main/java/com/venkat/ecommerce/api/service/OrderService.java#L59)\n  Fix: add a `@EntityGraph(attributePaths = {\"customer\",\"items\",\"items.product\",\"payment\"})` on the finder, or a `JOIN FETCH` query (one collection fetch-joined per query), or `@BatchSize` on the associations.\n- **[n+1]** Product list maps each product through `toResponse`, which reads the lazy `category` (`getCategory().getId()/getName()`) \u2192 one extra SELECT per product. \u2014 [`ProductService.java:105`](src/main/java/com/venkat/ecommerce/api/service/ProductService.java#L105)\n  Fix: `@EntityGraph(attributePaths = \"category\")` on `findAll`, or a `JOIN FETCH` query.\n- **[n+1]** Review list maps each review through `toResponse`, reading the lazy `customer` (and `product`) per review \u2192 one extra SELECT per review on the per-product reviews endpoint. \u2014 [`ReviewService.java:56`](src/main/java/com/venkat/ecommerce/api/service/ReviewService.java#L56)\n  Fix: fetch-join `customer`/`product` in `findByProductIdOrderByCreatedAtDesc`, or add an `@EntityGraph`.\n- **[error-handling]** The advice maps the three custom exceptions but has no fallback `@ExceptionHandler(Exception.class)`. Anything unexpected \u2014 including `DataIntegrityViolationException` from a DB unique constraint \u2014 bypasses the `ErrorResponse` contract and surfaces as Spring's default raw 500 (a unique-key clash returns 500 instead of 409). \u2014 [`GlobalExceptionHandler.java:16`](src/main/java/com/venkat/ecommerce/api/exception/GlobalExceptionHandler.java#L16)\n  Fix: add a catch-all `@ExceptionHandler(Exception.class)` returning a generic 500 `ErrorResponse` (no exception text), and a handler for `DataIntegrityViolationException` \u2192 409.\n- **[data-integrity]** The \"stock never goes negative\" invariant lives only in Java (`OrderService`); there is no DB `CHECK (stock_quantity >= 0)` backstop, so any path that bypasses the service (or the race above) can persist negative stock. \u2014 [`Product.java:46`](src/main/java/com/venkat/ecommerce/api/entity/Product.java#L46)\n  Fix: add a `CHECK (stock_quantity >= 0)` constraint so the database refuses bad data even if app logic is bypassed.\n- **[config]** `show-sql=true` and `format_sql=true` are on in the only (deployable) properties file \u2014 there is no profile separation, so they run in production: heavy log noise and SQL echoed on every request. \u2014 [`application.properties:8`](src/main/resources/application.properties#L8)\n  Fix: move these to an `application-dev.properties` gated behind the `dev` profile; leave them off in prod.\n\n## \ud83d\udd35 Info\n- **[concurrency]** No `@Version` optimistic-locking field on any entity. Beyond the critical stock path, concurrent order-status updates (`updateStatus`/`cancel`) can silently overwrite each other's last-write. \u2014 [`Order.java:37`](src/main/java/com/venkat/ecommerce/api/entity/Order.java#L37)\n  Fix: add a `@Version` field to `Order` (and `Product`, which also backs the critical fix).\n- **[concurrency]** Uniqueness is enforced with check-then-insert (`findByEmail/findBySku/findByName/findBySlug` then `save`), which two concurrent creators can both pass. This is low-risk only because each column has a DB `unique=true` backstop, so the second insert fails cleanly \u2014 but today that failure returns an ugly 500 (see the error-handling warning). \u2014 [`CustomerService.java:36`](src/main/java/com/venkat/ecommerce/api/service/CustomerService.java#L36)\n  Fix: keep the DB unique constraints (already present) and map `DataIntegrityViolationException` \u2192 409 so the race resolves to a clean conflict response.\n- **[config]** No DB migration tool (Flyway/Liquibase); schema is governed solely by `ddl-auto=validate`. That is safe (it won't mutate schema), but there is no versioned, repeatable way to evolve the schema in production. \u2014 [`application.properties:7`](src/main/resources/application.properties#L7)\n  Fix: add Flyway or Liquibase and manage schema changes as versioned migrations.\n\n## \u2705 Passed\n- transactions: every write service method (`create`/`update`/`delete`/`updateStatus`/`cancel`) is `@Transactional` and every read is `@Transactional(readOnly = true)`; the `updateStatus \u2192 cancel` self-call is not a proxy trap since both already run in one transaction and `cancel` is also reachable directly via the controller.\n- dto: every `@RestController` handler returns a `*Response` DTO (or `ResponseEntity<Void>`) and every `@RequestBody` binds a `*Request` DTO \u2014 no JPA entity is ever on the wire, and no entity carries credential/secret fields.\n- validation: every `@RequestBody` is `@Valid` (nested `@Valid` on order items too); request DTOs carry appropriate constraints (`@NotBlank`, `@Email`, `@Min`/`@Max`, `@PositiveOrZero`, `@DecimalMin`, `@Size`); custom exceptions map to 400/404/409/422 with a consistent `ErrorResponse` body and no stack traces.\n- config (schema safety): `ddl-auto=validate` \u2014 no `create`/`create-drop`/`update`, so boot will not drop or silently alter tables.\n- config (actuator): actuator is on the classpath but no `management.endpoints.web.exposure.include=*` override is set, so only the default health endpoint is web-exposed \u2014 not wide open.\n\n---\n\n**Want me to fix these? I'd start with the two criticals.** A few notes on what's mechanical vs. what needs judgment:\n\n- **Mechanical / safe:** add the fallback + `DataIntegrityViolationException` handlers, add a `CHECK (stock_quantity >= 0)` constraint, add `@EntityGraph` fetch plans for the three N+1 endpoints, and move `show-sql`/`format_sql` behind a `dev` profile.\n- **Needs judgment (behavior change):** the stock oversell fix \u2014 atomic DB decrement vs. `@Version` + retry vs. pessimistic lock \u2014 changes the write path and how failures are surfaced, so I'd want to confirm the approach with you first. Adding `@Version` also touches every concurrent update path.\n- **Config, not a code edit:** the DB password must be set for real and injected from the environment; removing the line from the file is not enough on its own.\n\nTell me which to take first \u2014 I can do the two criticals, or knock out all the mechanical warnings in one pass.\n"}], "grading": {"run_id": "eval-1-with_skill", "expectations": [{"text": "Produces a structured severity-graded readiness report despite no explicit phrase", "passed": true, "evidence": "Full Verdict + \ud83d\udd34/\ud83d\udfe0/\ud83d\udd35/\u2705 report produced from a casual 'before this goes live' prompt."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "Critical [config] at application.properties:5 \u2014 'DB password is blank and hardcoded'."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "Critical [concurrency] at OrderService.java:93 \u2014 unguarded read-check-write."}, {"text": "Lays out what to fix first, ordered by severity", "passed": true, "evidence": "Verdict line names the two criticals to fix first; offer text groups mechanical vs judgment fixes in severity order."}, {"text": "Every finding cites a concrete file:line location", "passed": true, "evidence": "Every bullet across Critical/Warning/Info carries a File.java:LINE link."}, {"text": "Does NOT wrongly flag ddl-auto=validate as a production risk", "passed": true, "evidence": "Line 38: ddl-auto=validate credited under Passed (schema safety)."}], "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}}}, {"id": "eval-1-without_skill-run-1", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "report.md", "type": "text", "content": "# Pre-Launch Readiness Audit \u2014 ecommerce-api\n\n**Verdict: NOT READY to go live.** Two blocking issues match exactly what you were worried about \u2014 a database with no password, and an order flow that oversells stock under concurrent traffic. There's also a bigger structural gap: the API has no authentication at all, so anyone who can reach it can read every customer's personal data and delete records. Fix the Critical items before launch.\n\nScope: read-only inspection of the Spring Boot source, JPA entities, config, and SQL schema. Nothing was modified or run.\n\n## Critical \u2014 fix before launch\n\n### C1. Database has a blank password\n`src/main/resources/application.properties:3-5` \u2014 `spring.datasource.username=postgres`, `spring.datasource.password=` (empty). The `postgres` superuser has no password, so the DB is protected only by network reachability. It's the \"leaked password\" problem in its worst form: nothing to leak because there is no password.\n**Fix:** set a strong password, use a least-privilege app role (not `postgres`), and externalize it as `spring.datasource.password=${DB_PASSWORD}` via env var / secrets manager. If a real credential ever lands in this file it must be **rotated**, not just deleted, since it stays in git history.\n\n### C2. Stock oversell race condition\n`src/main/java/com/venkat/ecommerce/api/service/OrderService.java:93-100` \u2014 reads `getStockQuantity()`, checks it, then decrements, with no atomicity guard. `Product` has no `@Version` (`entity/Product.java`), `ProductRepository` has no pessimistic `@Lock` (`repository/ProductRepository.java`), and the DB column has no `CHECK (stock_quantity >= 0)` (`db/schema.sql:35-52`). Under READ_COMMITTED, two concurrent orders for the last unit both pass the check and both decrement \u2014 overselling, possibly to negative stock.\n**Fix:** add `@Version` optimistic locking (+ retry), or a `PESSIMISTIC_WRITE` lock on the product read; add a DB `CHECK (stock_quantity >= 0)` as a backstop.\n\n### C3. No authentication or authorization anywhere\nNo `spring-boot-starter-security` in `pom.xml`, no security config. Every endpoint is public: `GET /api/v1/customers` returns all customers with email/phone/address (`CustomerController.java:29-32`, `CustomerResponse.java`) \u2014 a PII leak; customer/product delete endpoints are open; `POST /api/v1/orders` trusts a client-supplied `customerId` (`CreateOrderRequest.java:21-22`) \u2192 IDOR, order/cancel as anyone; same for reviews (`ReviewService.java:31-32`).\n**Fix:** add Spring Security, require auth on state-changing and PII endpoints, and derive the acting customer from the authenticated principal, not the request body.\n\n## Warnings\n- **W1. `show-sql=true` / `format_sql=true`** in prod (`application.properties:8-9`) \u2014 noisy/slow, may log data. Disable outside dev. (`ddl-auto=validate` on line 7 is the correct, safe choice \u2014 good.)\n- **W2. N+1 queries** on `OrderService.findAll` (`:57-62`, lazy walk of items\u2192product/customer/payment) and `ProductService.findAll` (`:26-30`, lazy `category` per product). Use `JOIN FETCH`/entity graphs and paginate.\n- **W3. Reviews** have no verified-purchase check and no dedup (`ReviewService.create:27-43`) \u2014 fake-review/spam vector, amplified by C3.\n- **W4. Actuator** is on the classpath with default exposure but unsecured because of C3. Lock it down / bind to an internal port.\n\n## Passed \u2014 verified clean\n- DTO boundary clean: every controller returns a `*Response` DTO, never a JPA entity.\n- All DB-writing service methods are `@Transactional` (the oversell is a locking gap, not a missing-transaction gap).\n- Request bodies validated (`@Valid` + `@NotNull/@NotBlank/@Min/@Email/@DecimalMin/@PositiveOrZero`); negative price/quantity rejected.\n- `GlobalExceptionHandler` returns structured errors with no stack traces.\n- Money uses `BigDecimal` throughout.\n- No hardcoded secrets in source (only benign Maven-wrapper `MVNW_PASSWORD` references).\n\n## Suggested fix order\n1. C1 (externalize/rotate DB password) \u2192 2. C2 (atomic stock decrement) \u2192 3. C3 (auth + principal-derived customer) \u2192 then W1\u2013W4.\n\n---\n\n_Note: the harness blocked writing the report to the requested path during the run, so this file was reconstructed verbatim from the agent's returned output._\n"}], "grading": {"run_id": "eval-1-without_skill", "expectations": [{"text": "Produces a structured severity-graded readiness report despite no explicit phrase", "passed": true, "evidence": "Verdict + Critical/Warnings/Passed structure produced."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "C1 'Database has a blank password' at application.properties:3-5."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "C2 'Stock oversell race condition' at OrderService.java:93-100."}, {"text": "Lays out what to fix first, ordered by severity", "passed": true, "evidence": "'Suggested fix order: 1. C1 -> 2. C2 -> 3. C3 -> then W1-W4'."}, {"text": "Every finding cites a concrete file:line location", "passed": false, "evidence": "Criticals cite lines, but W4 (actuator) and parts of C3 (auth) reference files/pom.xml without line numbers."}, {"text": "Does NOT wrongly flag ddl-auto=validate as a production risk", "passed": true, "evidence": "W1 explicitly notes 'ddl-auto=validate on line 7 is the correct, safe choice \u2014 good.'"}], "summary": {"passed": 5, "failed": 1, "total": 6, "pass_rate": 0.8333}}}, {"id": "eval-2-with_skill-run-1", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "report.md", "type": "text", "content": "# Production Readiness Report\n\n**Verdict: NOT READY \u2014 2 critical, 6 warning, 3 info**\nFix the stock oversell race in `OrderService.create` and get the database password out of the committed config (and rotated) before this ships.\n\n## \ud83d\udd34 Critical\n- **[concurrency]** Oversell race: stock is read, checked against the requested quantity, then decremented with no lock, no `@Version`, and no atomic DB update \u2014 two concurrent orders both read the same stock and both pass the check, driving stock negative / overselling \u2014 [`OrderService.java:93`](src/main/java/com/venkat/ecommerce/api/service/OrderService.java#L93)\n  Fix: make the decrement atomic in the DB (`UPDATE products SET stock_quantity = stock_quantity - :qty WHERE id = :id AND stock_quantity >= :qty`, check rows-affected), or add `@Version` optimistic locking on `Product` and retry, or a `PESSIMISTIC_WRITE` lock on the read. The same non-atomic read-modify-write is in `cancel()` (stock restore) \u2014 [`OrderService.java:165`](src/main/java/com/venkat/ecommerce/api/service/OrderService.java#L165).\n- **[config]** Blank database password committed in config, alongside the default `postgres` username \u2014 the DB is protected only by network reachability, and the values are hardcoded rather than externalized \u2014 [`application.properties:5`](src/main/resources/application.properties#L5)\n  Fix: move url/username/password to environment variables (`${DB_URL}`, `${DB_USERNAME}`, `${DB_PASSWORD}`) or a secrets manager. Set a real password. Note: anything ever committed here must be **rotated**, not just deleted \u2014 it stays in git history.\n\n## \ud83d\udfe0 Warning\n- **[n+1]** `Order` list endpoint is N+1: `findAll()` then `toResponse` walks `items`, `item.getProduct()`, `customer`, and `payment` \u2014 all LAZY \u2014 firing multiple extra SELECTs per order \u2014 [`OrderService.java:58`](src/main/java/com/venkat/ecommerce/api/service/OrderService.java#L58)\n  Fix: add a `JOIN FETCH` / `@EntityGraph` finder covering items+product+customer+payment (only one collection can be join-fetched per query), or `@BatchSize` on the associations.\n- **[n+1]** `Product` list endpoint is N+1: `findAll()` then `toResponse` reads `product.getCategory()` (LAZY) per row \u2014 [`ProductService.java:26`](src/main/java/com/venkat/ecommerce/api/service/ProductService.java#L26)\n  Fix: `@EntityGraph(attributePaths = \"category\")` on the finder or a `JOIN FETCH` query.\n- **[n+1]** Review list endpoint is N+1: `findByProductIdOrderByCreatedAtDesc` then `toResponse` reads `review.getCustomer()` (LAZY) per review \u2014 [`ReviewService.java:50`](src/main/java/com/venkat/ecommerce/api/service/ReviewService.java#L50)\n  Fix: add a `JOIN FETCH r.customer` query or `@EntityGraph` on the finder.\n- **[config]** `show-sql=true` and `format_sql=true` ship in the single, deployable properties file with no profile separation \u2014 log noise and potential data exposure in prod logs \u2014 [`application.properties:8`](src/main/resources/application.properties#L8)\n  Fix: gate these behind a `dev` profile (`application-dev.properties`); keep them off in the default/prod config.\n- **[error-handling]** No handler for `DataIntegrityViolationException` and no catch-all `@ExceptionHandler(Exception.class)` \u2014 a DB constraint violation (e.g. the concurrent-duplicate case below, or a not-null breach) surfaces as a raw 500 instead of a clean 4xx, breaking the consistent error contract \u2014 [`GlobalExceptionHandler.java:16`](src/main/java/com/venkat/ecommerce/api/exception/GlobalExceptionHandler.java#L16)\n  Fix: add a handler mapping `DataIntegrityViolationException` to 409 and a generic `Exception` fallback to 500 with a safe body (no stack trace / raw message).\n- **[data-integrity]** The \"stock never goes negative\" invariant is enforced only in Java; the `stock_quantity` column has no DB `CHECK (stock_quantity >= 0)` backstop, so if the app check is bypassed or races, the DB accepts bad data \u2014 [`Product.java:46`](src/main/java/com/venkat/ecommerce/api/entity/Product.java#L46)\n  Fix: add a `CHECK (stock_quantity >= 0)` constraint (via `@Check`/migration) as a database-level guardrail behind the app logic.\n\n## \ud83d\udd35 Info\n- **[concurrency]** No optimistic-locking `@Version` on any mutable entity (`Product`, `Order`, `Payment`) \u2014 concurrent updates last-write-wins silently \u2014 [`Product.java:28`](src/main/java/com/venkat/ecommerce/api/entity/Product.java#L28)\n  Fix: add a `@Version` field to contended entities (also resolves the oversell path if you go the optimistic-locking route).\n- **[concurrency]** Check-then-insert for uniqueness (`findByEmail`/`findBySku`/`findByName`/`findBySlug` -> `save`) can let two concurrent requests both pass the check \u2014 but each target column has a DB `unique` constraint as backstop, so the second insert fails at the DB rather than duplicating \u2014 [`CustomerService.java:36`](src/main/java/com/venkat/ecommerce/api/service/CustomerService.java#L36)\n  Fix: none required for correctness; handle the resulting `DataIntegrityViolationException` cleanly (see the warning above) so the loser gets a 409, not a 500. Also `ProductService.java:39`, `CategoryService.java:36`.\n- **[data-integrity]** No explicit indexes on foreign-key / lookup columns (e.g. `reviews.product_id` behind `findByProductIdOrderByCreatedAtDesc`, `order_items.product_id`, `products.category_id`) \u2014 Postgres does not auto-index FKs \u2014 [`Review.java:33`](src/main/java/com/venkat/ecommerce/api/entity/Review.java#L33)\n  Fix: add `@Index` (via `@Table(indexes = ...)`) / migration indexes on frequently filtered FK columns.\n\n## \u2705 Passed\n- transactions: every write service method (`create`/`update`/`delete`/`updateStatus`/`cancel`) is `@Transactional` and every read method is `@Transactional(readOnly = true)`; the `updateStatus -> cancel` self-invocation is harmless (already inside an active transaction, propagation just joins).\n- dto: all controller handlers return response DTOs or `ResponseEntity<Void>`, and all `@RequestBody` params bind request DTOs \u2014 no JPA entities cross the web boundary in either direction.\n- validation: every `@RequestBody` is `@Valid` (including nested `@Valid` on order items), and request DTOs carry appropriate constraints (`@NotBlank`, `@NotNull`, `@Email`, `@Size`, `@Min`/`@Max`, `@DecimalMin`, `@PositiveOrZero`); a `@RestControllerAdvice` maps not-found->404, business-rule->422, duplicate->409, bean-validation->400.\n- config: `spring.jpa.hibernate.ddl-auto=validate` \u2014 correct for a deployable profile (no schema mutation on boot).\n\n---\n\n**Want me to fix these? I'd start with the two critical items.** Suggested order and what each entails:\n\n1. **Oversell race (\ud83d\udd34, needs judgment)** \u2014 behavioral change: I'd switch the decrement to an atomic conditional `UPDATE` with a rows-affected check (or add `@Version` + retry). This changes how the stock path executes under contention, so it warrants review and a concurrency test.\n2. **Blank/hardcoded DB credentials (\ud83d\udd34, mechanical + operational)** \u2014 I can externalize the datasource config to `${...}` env vars mechanically, but the leaked value must be **rotated** in your secrets store \u2014 a code edit can't un-leak what's already in git history.\n3. **N+1 endpoints (\ud83d\udfe0, needs judgment)** \u2014 adding `@EntityGraph`/`JOIN FETCH` finders and rewiring the services; I'd verify query counts after.\n4. **`show-sql` profile split, `DataIntegrityViolation`/fallback handler, stock `CHECK` constraint (\ud83d\udfe0, mostly mechanical)** \u2014 safe, contained edits.\n5. **`@Version`, FK indexes (\ud83d\udd35)** \u2014 optional hardening, low risk.\n\nTell me which to take on and I'll do them in severity order, re-running the affected check after each.\n"}], "grading": {"run_id": "eval-2-with_skill", "expectations": [{"text": "Report addresses all five areas (config, transactions, web layer, concurrency)", "passed": true, "evidence": "Findings/Passed cover config, transactions, dto, validation, error-handling, n+1, and concurrency/data-integrity."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "Critical [config] at application.properties:5 \u2014 blank hardcoded password, must be rotated."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "Critical [concurrency] at OrderService.java:93 \u2014 oversell race."}, {"text": "A go/no-go verdict appears at the top of the report", "passed": true, "evidence": "Line 3: '**Verdict: NOT READY \u2014 2 critical, 6 warning, 3 info**' at the top."}, {"text": "Ends by offering to fix (severity order) and does NOT edit repo files yet", "passed": true, "evidence": "Closing offer lists fixes in severity order and asks which to take; agent confirmed no source files modified."}, {"text": "Flags at least one N+1 query risk as a warning", "passed": true, "evidence": "Three \ud83d\udfe0 [n+1] warnings: OrderService.findAll, ProductService, ReviewService."}], "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}}}, {"id": "eval-2-without_skill-run-1", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "report.md", "type": "text", "content": "# Pre-Release Hardening Report \u2014 ecommerce-api\n\nRead-only review of the Spring Boot + JPA ecommerce API. Findings are grouped by severity.\n\n**Scope:** configuration, transactions, the web layer, concurrency, persistence/N+1, validation, data-model correctness.\n\n## Summary\nCleanly structured, good conventions (DTOs everywhere, centralized exception handling, ddl-auto=validate, BigDecimal money, order state machine, DB constraints/indexes). Release-blocking gaps cluster in three areas: concurrency (oversellable stock, racy duplicate checks, no @Version), web-layer robustness (unhandled exceptions -> 500s, no pagination, no security), and configuration (baked-in credentials/SQL logging, no prod profile, no pool tuning). Counts: 2 Critical, 5 High, 6 Medium, 4 Low.\n\n## Critical\n\n### C1. Stock can be oversold under concurrent orders (lost update)\nOrderService.create() (lines 87-100) reads stock, checks it, then writes stock - qty with no locking. Two concurrent orders for the same product both read the same value, both pass the check, and the second write clobbers the first -> oversell. cancel() (165-168) restores stock the same unguarded way. There is no @Version column on any entity, no pessimistic lock (@Lock(PESSIMISTIC_WRITE)/SELECT FOR UPDATE), and no DB guard (no CHECK stock_quantity >= 0, no conditional UPDATE ... WHERE stock >= ?). Fix with any one of: version + retry, pessimistic lock, or atomic conditional update + CHECK constraint. Top pre-release risk.\n\n### C2. No authentication or authorization on any endpoint\nNo Spring Security dependency, no security config. Every endpoint is open: customer PII (email/phone/address) readable via GET /api/v1/customers; anyone can create/cancel orders, drive status transitions, and DELETE products/categories/customers. Actuator is on the classpath with no exposure/access config. Critical if internet-facing; High if strictly internal \u2014 but make it a conscious decision.\n\n## High\n\n### H1. Duplicate-check races surface as 500, not 409\nCustomer/Category/Product create+update do findBy...isPresent() then save(). Concurrent requests both pass and both insert; the DB unique constraints (uk_customers_email, uk_products_sku, uk_categories_name/slug) prevent bad data but the resulting DataIntegrityViolationException is unhandled -> client gets 500 instead of the contracted 409. Add a handler and treat the constraint as source of truth.\n\n### H2. Unhandled exception types bypass the error contract\nGlobalExceptionHandler covers ResourceNotFound, BusinessRule, DuplicateResource, MethodArgumentNotValid. Missing: HttpMessageNotReadableException (malformed JSON / invalid enum for status/paymentMethod), MethodArgumentTypeMismatchException (e.g. GET /orders/abc), DataIntegrityViolationException (H1), and a catch-all Exception. These return Spring's default shape / 500 instead of ErrorResponse. CLAUDE.md also lists AccessDeniedException -> 403 with no handler.\n\n### H3. findAll() endpoints are unbounded (no pagination)\nOrder/Product/Customer/Category controllers return full Lists. Loads every row (orders also trigger H4) per request \u2014 latency + memory/DoS risk. Use Pageable/Page with default and max page size.\n\n### H4. N+1 queries on list/read paths\nLazy associations mapped correctly but toResponse walks them with no fetch join/@EntityGraph. OrderService.findAll(): per order getItems(), per item getProduct(), plus getCustomer() and getPayment() -> ~1 + N + N*items + N + N queries. ProductService.findAll(): getCategory() per product. ReviewService.findByProduct(): getCustomer() per review. Correct under readOnly tx but won't scale. Use @EntityGraph / JOIN FETCH (mind pagination + collection fetch interaction).\n\n### H5. Unbounded string inputs (no @Size on TEXT-backed fields)\nshippingAddress, notes, description, address, comment map to TEXT with no @Size cap \u2014 arbitrarily large payloads. ProductRequest.price lacks @Digits(integer=8, fraction=2) to match NUMERIC(10,2), so 1.234 or > 99,999,999.99 passes bean validation then fails at the DB as 500. Add @Size/@Digits bounds.\n\n## Medium\n\n### M1. spring.jpa.open-in-view left at default (true)\nNot set -> Boot defaults to true and logs the warning. Mapping already happens inside transactional service methods, so OSIV isn't needed. Set open-in-view=false to keep DB sessions off the render path and make N+1 (H4) fail fast in tests.\n\n### M2. DB credentials and SQL logging hard-coded\napplication.properties: password is empty, username is superuser postgres, both committed. Externalize to env/secrets and use a least-privilege role. show-sql=true + format_sql=true should be off in prod (log volume, latency, data leakage).\n\n### M3. No production profile / no connection-pool tuning\nSingle application.properties with dev settings, no application-prod.*. HikariCP entirely on defaults. Size the pool against expected concurrency and Postgres max_connections; split dev/prod config.\n\n### M4. Actuator exposed but unconfigured\nActuator dependency with no management.endpoints.web.exposure.* or access rules. Defaults are conservative (health/info) but with no security (C2) this is easy to widen accidentally. Pin exposure and protect management endpoints.\n\n### M5. Payment lifecycle incomplete (dead refund branch)\nPayments are created PENDING and nothing ever transitions to COMPLETED, so the refund branch in cancel() (172-174, if COMPLETED -> REFUNDED) is unreachable. Confirm whether a payment-capture flow is intended/missing before release.\n\n### M6. updateStatus() -> cancel() self-invocation + redundant reload\nupdateStatus() (line 147) calls this.cancel(id). Both are @Transactional(REQUIRED) on the same bean and updateStatus already opened a tx, so it works \u2014 but it is a proxy self-invocation (inner @Transactional ignored) and re-runs getOrder(id) + the transition check. Refactor risk; extract a shared private helper.\n\n## Low\n\n### L1. Manual, inconsistent timestamp handling\ncreatedAt/updatedAt set by hand with LocalDateTime.now(); Order uses @PrePersist only for order_number. Prefer @CreationTimestamp/@UpdateTimestamp or auditing. Customer has no updatedAt (matches schema).\n\n### L2. Entity @Column mappings don't mirror DB precision/length\nBigDecimal fields declare no precision/scale, relying on schema.sql NUMERIC(10,2)/(12,2). Safe under validate, but not self-documenting and fragile if ddl-auto changes.\n\n### L3. schema.sql is destructive at the top\nOpens with DROP DATABASE IF EXISTS ecommerce_db; plus psql \\c/SELECT commands. Fine as a local bootstrap, but keep it off any app-managed migration path; consider Flyway/Liquibase for versioned migrations.\n\n### L4. No CORS / request-size / rate-limit policy\nNo CorsConfigurationSource, no server.tomcat.max-* limits, no rate limiting. Deployment-dependent, but should be deliberate.\n\n## What already looks good (leave alone)\n- Every controller returns a DTO; no entity serialized out.\n- Every write service method is @Transactional; reads are readOnly=true. No missing boundaries.\n- ddl-auto=validate with explicit schema.sql (FKs, unique constraints, CHECKs, indexes present).\n- Money is BigDecimal end to end, backed by NUMERIC.\n- Order state machine with explicit allowed-transition map.\n- Bean validation on request DTOs; centralized ErrorResponse.\n- Defensive OrderItem subtotal recomputation via @PrePersist/@PreUpdate.\n\n## Suggested fix order\n1. C1 stock oversell. 2. C2/M4 security for API + actuator. 3. H1+H2 round out GlobalExceptionHandler. 4. H3+H4 pagination + N+1 fetch strategy. 5. H5 input-size/@Digits bounds. 6. M1/M2/M3 config. 7. Mediums/Lows as capacity allows.\n\nTell me which of these you want fixed and I'll implement them.\n"}], "grading": {"run_id": "eval-2-without_skill", "expectations": [{"text": "Report addresses all five areas (config, transactions, web layer, concurrency)", "passed": true, "evidence": "Covers configuration, transactions, web layer, concurrency, persistence/N+1, validation."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": false, "evidence": "The blank/hardcoded DB password is rated Medium (M2), not Critical \u2014 under-calibrated for a blank prod superuser password."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "C1 'Stock can be oversold under concurrent orders', cites OrderService.create() lines 87-100."}, {"text": "A go/no-go verdict appears at the top of the report", "passed": false, "evidence": "Leads with a Summary and severity counts (2 Critical / 5 High / 6 Medium / 4 Low) but never states an explicit go/no-go / ship-or-not verdict."}, {"text": "Ends by offering to fix (severity order) and does NOT edit repo files yet", "passed": true, "evidence": "Ends 'Tell me which of these you want fixed and I'll implement them'; suggested fix order present; no files modified."}, {"text": "Flags at least one N+1 query risk as a warning", "passed": true, "evidence": "H4 'N+1 queries on list/read paths' (rated High rather than Warning, but flagged)."}], "summary": {"passed": 4, "failed": 2, "total": 6, "pass_rate": 0.6667}}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"metadata": {"skill_name": "production-readiness-check", "skill_path": "<path/to/skill>", "executor_model": "<model-name>", "analyzer_model": "<model-name>", "timestamp": "2026-07-18T14:17:59Z", "evals_run": [0, 1, 2], "runs_per_configuration": 3}, "runs": [{"eval_id": 0, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 7, "failed": 0, "total": 7, "time_seconds": 192.5, "tokens": 74109, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Gives a clear NOT READY / no-go verdict prominently", "passed": true, "evidence": "Line 3: '**Verdict: NOT READY \u2014 2 critical, 5 warning, 3 info**' as the first line under the title."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "Critical bullet [config], application.properties:5 \u2014 'Blank datasource password committed'."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "Critical bullet [concurrency], OrderService.java:93 \u2014 'read-check-write on stockQuantity with no lock'."}, {"text": "Every finding cites a concrete file:line location", "passed": true, "evidence": "All 10 findings carry a clickable File.java:LINE link; Passed items reference lines too."}, {"text": "Findings are grouped by severity (critical / warning / info)", "passed": true, "evidence": "Explicit \ud83d\udd34 Critical / \ud83d\udfe0 Warning / \ud83d\udd35 Info / \u2705 Passed sections."}, {"text": "Does NOT wrongly flag ddl-auto=validate as a production risk", "passed": true, "evidence": "Line 37 lists ddl-auto=validate under Passed as 'correct for prod'."}, {"text": "Credits at least one genuinely clean area as passed", "passed": true, "evidence": "Passed section credits transactions, dto boundary, and validation as clean."}], "notes": []}, {"eval_id": 1, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 333.4, "tokens": 81824, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Produces a structured severity-graded readiness report despite no explicit phrase", "passed": true, "evidence": "Full Verdict + \ud83d\udd34/\ud83d\udfe0/\ud83d\udd35/\u2705 report produced from a casual 'before this goes live' prompt."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "Critical [config] at application.properties:5 \u2014 'DB password is blank and hardcoded'."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "Critical [concurrency] at OrderService.java:93 \u2014 unguarded read-check-write."}, {"text": "Lays out what to fix first, ordered by severity", "passed": true, "evidence": "Verdict line names the two criticals to fix first; offer text groups mechanical vs judgment fixes in severity order."}, {"text": "Every finding cites a concrete file:line location", "passed": true, "evidence": "Every bullet across Critical/Warning/Info carries a File.java:LINE link."}, {"text": "Does NOT wrongly flag ddl-auto=validate as a production risk", "passed": true, "evidence": "Line 38: ddl-auto=validate credited under Passed (schema safety)."}], "notes": []}, {"eval_id": 2, "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 266.3, "tokens": 75791, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Report addresses all five areas (config, transactions, web layer, concurrency)", "passed": true, "evidence": "Findings/Passed cover config, transactions, dto, validation, error-handling, n+1, and concurrency/data-integrity."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "Critical [config] at application.properties:5 \u2014 blank hardcoded password, must be rotated."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "Critical [concurrency] at OrderService.java:93 \u2014 oversell race."}, {"text": "A go/no-go verdict appears at the top of the report", "passed": true, "evidence": "Line 3: '**Verdict: NOT READY \u2014 2 critical, 6 warning, 3 info**' at the top."}, {"text": "Ends by offering to fix (severity order) and does NOT edit repo files yet", "passed": true, "evidence": "Closing offer lists fixes in severity order and asks which to take; agent confirmed no source files modified."}, {"text": "Flags at least one N+1 query risk as a warning", "passed": true, "evidence": "Three \ud83d\udfe0 [n+1] warnings: OrderService.findAll, ProductService, ReviewService."}], "notes": []}, {"eval_id": 0, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.8571, "passed": 6, "failed": 1, "total": 7, "time_seconds": 167.8, "tokens": 58840, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Gives a clear NOT READY / no-go verdict prominently", "passed": true, "evidence": "'## Verdict: NO-GO for Friday' near the top."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "Blocker #4: 'username=postgres and an empty password' listed as a hard blocker."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "Blocker #2: race condition in OrderService.create(), cites OrderService.java:87-100."}, {"text": "Every finding cites a concrete file:line location", "passed": false, "evidence": "Only some findings cite lines (OrderService.java:87-100). The auth blocker, config issues, migration/actuator findings reference files/dirs but no line numbers."}, {"text": "Findings are grouped by severity (critical / warning / info)", "passed": true, "evidence": "Grouped as Blockers / Major issues / Minor / follow-ups \u2014 a severity ordering."}, {"text": "Does NOT wrongly flag ddl-auto=validate as a production risk", "passed": true, "evidence": "Line 52: 'ddl-auto=validate is the right choice'."}, {"text": "Credits at least one genuinely clean area as passed", "passed": true, "evidence": "'What's genuinely good' section credits DTO coverage and @Transactional coverage."}], "notes": []}, {"eval_id": 1, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.8333, "passed": 5, "failed": 1, "total": 6, "time_seconds": 164.6, "tokens": 57799, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Produces a structured severity-graded readiness report despite no explicit phrase", "passed": true, "evidence": "Verdict + Critical/Warnings/Passed structure produced."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": true, "evidence": "C1 'Database has a blank password' at application.properties:3-5."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "C2 'Stock oversell race condition' at OrderService.java:93-100."}, {"text": "Lays out what to fix first, ordered by severity", "passed": true, "evidence": "'Suggested fix order: 1. C1 -> 2. C2 -> 3. C3 -> then W1-W4'."}, {"text": "Every finding cites a concrete file:line location", "passed": false, "evidence": "Criticals cite lines, but W4 (actuator) and parts of C3 (auth) reference files/pom.xml without line numbers."}, {"text": "Does NOT wrongly flag ddl-auto=validate as a production risk", "passed": true, "evidence": "W1 explicitly notes 'ddl-auto=validate on line 7 is the correct, safe choice \u2014 good.'"}], "notes": []}, {"eval_id": 2, "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.6667, "passed": 4, "failed": 2, "total": 6, "time_seconds": 405.1, "tokens": 86234, "tool_calls": 0, "errors": 0}, "expectations": [{"text": "Report addresses all five areas (config, transactions, web layer, concurrency)", "passed": true, "evidence": "Covers configuration, transactions, web layer, concurrency, persistence/N+1, validation."}, {"text": "Identifies the blank Postgres datasource password as a critical config finding", "passed": false, "evidence": "The blank/hardcoded DB password is rated Medium (M2), not Critical \u2014 under-calibrated for a blank prod superuser password."}, {"text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding", "passed": true, "evidence": "C1 'Stock can be oversold under concurrent orders', cites OrderService.create() lines 87-100."}, {"text": "A go/no-go verdict appears at the top of the report", "passed": false, "evidence": "Leads with a Summary and severity counts (2 Critical / 5 High / 6 Medium / 4 Low) but never states an explicit go/no-go / ship-or-not verdict."}, {"text": "Ends by offering to fix (severity order) and does NOT edit repo files yet", "passed": true, "evidence": "Ends 'Tell me which of these you want fixed and I'll implement them'; suggested fix order present; no files modified."}, {"text": "Flags at least one N+1 query risk as a warning", "passed": true, "evidence": "H4 'N+1 queries on list/read paths' (rated High rather than Warning, but flagged)."}], "notes": []}], "run_summary": {"with_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "time_seconds": {"mean": 264.0667, "stddev": 70.4765, "min": 192.5, "max": 333.4}, "tokens": {"mean": 77241.3333, "stddev": 4056.8345, "min": 74109, "max": 81824}}, "without_skill": {"pass_rate": {"mean": 0.7857, "stddev": 0.1037, "min": 0.6667, "max": 0.8571}, "time_seconds": {"mean": 245.8333, "stddev": 137.9383, "min": 164.6, "max": 405.1}, "tokens": {"mean": 67624.3333, "stddev": 16124.847, "min": 57799, "max": 86234}}, "delta": {"pass_rate": "+0.21", "time_seconds": "+18.2", "tokens": "+9617"}}, "notes": []}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

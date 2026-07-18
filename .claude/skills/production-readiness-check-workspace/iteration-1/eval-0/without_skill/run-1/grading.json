@@ -1,0 +1,46 @@
+{
+  "run_id": "eval-0-without_skill",
+  "expectations": [
+    {
+      "text": "Gives a clear NOT READY / no-go verdict prominently",
+      "passed": true,
+      "evidence": "'## Verdict: NO-GO for Friday' near the top."
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "passed": true,
+      "evidence": "Blocker #4: 'username=postgres and an empty password' listed as a hard blocker."
+    },
+    {
+      "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+      "passed": true,
+      "evidence": "Blocker #2: race condition in OrderService.create(), cites OrderService.java:87-100."
+    },
+    {
+      "text": "Every finding cites a concrete file:line location",
+      "passed": false,
+      "evidence": "Only some findings cite lines (OrderService.java:87-100). The auth blocker, config issues, migration/actuator findings reference files/dirs but no line numbers."
+    },
+    {
+      "text": "Findings are grouped by severity (critical / warning / info)",
+      "passed": true,
+      "evidence": "Grouped as Blockers / Major issues / Minor / follow-ups \u2014 a severity ordering."
+    },
+    {
+      "text": "Does NOT wrongly flag ddl-auto=validate as a production risk",
+      "passed": true,
+      "evidence": "Line 52: 'ddl-auto=validate is the right choice'."
+    },
+    {
+      "text": "Credits at least one genuinely clean area as passed",
+      "passed": true,
+      "evidence": "'What's genuinely good' section credits DTO coverage and @Transactional coverage."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.8571
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "run_id": "eval-2-with_skill",
+  "expectations": [
+    {
+      "text": "Report addresses all five areas (config, transactions, web layer, concurrency)",
+      "passed": true,
+      "evidence": "Findings/Passed cover config, transactions, dto, validation, error-handling, n+1, and concurrency/data-integrity."
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "passed": true,
+      "evidence": "Critical [config] at application.properties:5 \u2014 blank hardcoded password, must be rotated."
+    },
+    {
+      "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+      "passed": true,
+      "evidence": "Critical [concurrency] at OrderService.java:93 \u2014 oversell race."
+    },
+    {
+      "text": "A go/no-go verdict appears at the top of the report",
+      "passed": true,
+      "evidence": "Line 3: '**Verdict: NOT READY \u2014 2 critical, 6 warning, 3 info**' at the top."
+    },
+    {
+      "text": "Ends by offering to fix (severity order) and does NOT edit repo files yet",
+      "passed": true,
+      "evidence": "Closing offer lists fixes in severity order and asks which to take; agent confirmed no source files modified."
+    },
+    {
+      "text": "Flags at least one N+1 query risk as a warning",
+      "passed": true,
+      "evidence": "Three \ud83d\udfe0 [n+1] warnings: OrderService.findAll, ProductService, ReviewService."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  }
+}

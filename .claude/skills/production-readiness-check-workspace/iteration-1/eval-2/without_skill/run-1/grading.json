@@ -1,0 +1,41 @@
+{
+  "run_id": "eval-2-without_skill",
+  "expectations": [
+    {
+      "text": "Report addresses all five areas (config, transactions, web layer, concurrency)",
+      "passed": true,
+      "evidence": "Covers configuration, transactions, web layer, concurrency, persistence/N+1, validation."
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "passed": false,
+      "evidence": "The blank/hardcoded DB password is rated Medium (M2), not Critical \u2014 under-calibrated for a blank prod superuser password."
+    },
+    {
+      "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+      "passed": true,
+      "evidence": "C1 'Stock can be oversold under concurrent orders', cites OrderService.create() lines 87-100."
+    },
+    {
+      "text": "A go/no-go verdict appears at the top of the report",
+      "passed": false,
+      "evidence": "Leads with a Summary and severity counts (2 Critical / 5 High / 6 Medium / 4 Low) but never states an explicit go/no-go / ship-or-not verdict."
+    },
+    {
+      "text": "Ends by offering to fix (severity order) and does NOT edit repo files yet",
+      "passed": true,
+      "evidence": "Ends 'Tell me which of these you want fixed and I'll implement them'; suggested fix order present; no files modified."
+    },
+    {
+      "text": "Flags at least one N+1 query risk as a warning",
+      "passed": true,
+      "evidence": "H4 'N+1 queries on list/read paths' (rated High rather than Warning, but flagged)."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 2,
+    "total": 6,
+    "pass_rate": 0.6667
+  }
+}

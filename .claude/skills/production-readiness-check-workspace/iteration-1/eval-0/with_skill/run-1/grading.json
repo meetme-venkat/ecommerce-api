@@ -1,0 +1,46 @@
+{
+  "run_id": "eval-0-with_skill",
+  "expectations": [
+    {
+      "text": "Gives a clear NOT READY / no-go verdict prominently",
+      "passed": true,
+      "evidence": "Line 3: '**Verdict: NOT READY \u2014 2 critical, 5 warning, 3 info**' as the first line under the title."
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "passed": true,
+      "evidence": "Critical bullet [config], application.properties:5 \u2014 'Blank datasource password committed'."
+    },
+    {
+      "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+      "passed": true,
+      "evidence": "Critical bullet [concurrency], OrderService.java:93 \u2014 'read-check-write on stockQuantity with no lock'."
+    },
+    {
+      "text": "Every finding cites a concrete file:line location",
+      "passed": true,
+      "evidence": "All 10 findings carry a clickable File.java:LINE link; Passed items reference lines too."
+    },
+    {
+      "text": "Findings are grouped by severity (critical / warning / info)",
+      "passed": true,
+      "evidence": "Explicit \ud83d\udd34 Critical / \ud83d\udfe0 Warning / \ud83d\udd35 Info / \u2705 Passed sections."
+    },
+    {
+      "text": "Does NOT wrongly flag ddl-auto=validate as a production risk",
+      "passed": true,
+      "evidence": "Line 37 lists ddl-auto=validate under Passed as 'correct for prod'."
+    },
+    {
+      "text": "Credits at least one genuinely clean area as passed",
+      "passed": true,
+      "evidence": "Passed section credits transactions, dto boundary, and validation as clean."
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1.0
+  }
+}

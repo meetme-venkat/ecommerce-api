@@ -1,0 +1,41 @@
+{
+  "run_id": "eval-1-without_skill",
+  "expectations": [
+    {
+      "text": "Produces a structured severity-graded readiness report despite no explicit phrase",
+      "passed": true,
+      "evidence": "Verdict + Critical/Warnings/Passed structure produced."
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "passed": true,
+      "evidence": "C1 'Database has a blank password' at application.properties:3-5."
+    },
+    {
+      "text": "Identifies the unguarded stock oversell race in OrderService.create as a critical concurrency finding",
+      "passed": true,
+      "evidence": "C2 'Stock oversell race condition' at OrderService.java:93-100."
+    },
+    {
+      "text": "Lays out what to fix first, ordered by severity",
+      "passed": true,
+      "evidence": "'Suggested fix order: 1. C1 -> 2. C2 -> 3. C3 -> then W1-W4'."
+    },
+    {
+      "text": "Every finding cites a concrete file:line location",
+      "passed": false,
+      "evidence": "Criticals cite lines, but W4 (actuator) and parts of C3 (auth) reference files/pom.xml without line numbers."
+    },
+    {
+      "text": "Does NOT wrongly flag ddl-auto=validate as a production risk",
+      "passed": true,
+      "evidence": "W1 explicitly notes 'ddl-auto=validate on line 7 is the correct, safe choice \u2014 good.'"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.8333
+  }
+}
