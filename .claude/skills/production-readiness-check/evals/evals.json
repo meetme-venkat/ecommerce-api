@@ -1,0 +1,51 @@
+{
+  "skill_name": "production-readiness-check",
+  "evals": [
+    {
+      "id": 0,
+      "name": "direct-go-no-go",
+      "prompt": "We're supposed to deploy the ecommerce-api to prod on Friday. Can you go through it and tell me if it's actually ready to ship? I want a straight go/no-go, not a maybe.",
+      "expected_output": "A grouped severity report with a NOT READY verdict. Flags the blank Postgres password (config, critical) and the unguarded stock oversell race in OrderService.create (concurrency, critical). Cites real file:line for each finding, groups by severity, credits clean areas, and does not wrongly flag ddl-auto=validate.",
+      "files": [],
+      "assertions": [
+        "Gives a clear NOT READY / no-go verdict prominently (not a hedge)",
+        "Identifies the blank Postgres datasource password as a critical config finding",
+        "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+        "Every finding cites a concrete file:line location",
+        "Findings are grouped by severity (critical / warning / info)",
+        "Does NOT wrongly flag ddl-auto=validate as a production risk (validate is correct for prod)",
+        "Credits at least one genuinely clean area as passed (DTO boundary, @Transactional coverage, or input validation)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "pre-launch-implicit",
+      "prompt": "before this goes live i want to make sure nothing embarrassing is gonna blow up on us — like leaked passwords, some race condition that lets people order stuff we don't have, that kind of thing. can you audit the codebase and lay out what needs fixing first?",
+      "expected_output": "Recognizes this as a production readiness audit without the exact phrase. Finds the blank DB password and the stock oversell race as top-priority criticals, ordered by severity, in the grouped report format with file:line citations.",
+      "files": [],
+      "assertions": [
+        "Produces a structured severity-graded readiness report (recognizes the intent despite no explicit 'production readiness' phrase)",
+        "Identifies the blank Postgres datasource password as a critical config finding",
+        "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+        "Lays out what to fix first, ordered by severity (criticals before warnings)",
+        "Every finding cites a concrete file:line location",
+        "Does NOT wrongly flag ddl-auto=validate as a production risk (validate is correct for prod)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "hardening-review-then-fix",
+      "prompt": "Do a hardening pass over this Spring Boot API before release — config, transactions, the web layer, concurrency, all of it. Give me the report first, then I'll tell you what to fix.",
+      "expected_output": "Systematic report covering all five areas with a go/no-go verdict up top. Catches the config secret and the concurrency race as criticals, lists N+1 / validation warnings, shows a Passed section, and offers to fix in severity order without editing code yet.",
+      "files": [],
+      "assertions": [
+        "Report addresses all five areas: config, transactions, web layer (dto/validation/error-handling), and concurrency",
+        "Identifies the blank Postgres datasource password as a critical config finding",
+        "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+        "A go/no-go verdict appears at the top of the report",
+        "Ends by offering to fix (in severity order) and does NOT edit any repository files yet — waits for the user to choose",
+        "Flags at least one N+1 query risk as a warning"
+      ]
+    }
+  ]
+}
