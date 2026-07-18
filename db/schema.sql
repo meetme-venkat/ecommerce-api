@@ -128,6 +128,27 @@ CREATE TABLE payments (
         CHECK (amount >= 0)
 );
 
+-- Reviews
+CREATE TABLE reviews (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY,
+    product_id  BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    rating      INTEGER NOT NULL,
+    comment     TEXT,
+    created_at  TIMESTAMP,
+
+    CONSTRAINT pk_reviews PRIMARY KEY (id),
+    CONSTRAINT fk_reviews_product
+        FOREIGN KEY (product_id)
+        REFERENCES products (id),
+    CONSTRAINT fk_reviews_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES customers (id),
+
+    CONSTRAINT chk_reviews_rating
+        CHECK (rating BETWEEN 1 AND 5)
+);
+
 -- ============================================================================
 -- INDEXES
 -- ============================================================================
@@ -149,6 +170,9 @@ CREATE INDEX idx_order_items_order
 
 CREATE INDEX idx_order_items_product
     ON order_items (product_id);
+
+CREATE INDEX idx_reviews_product
+    ON reviews (product_id);
 
 -- ============================================================================
 -- SEED DATA
