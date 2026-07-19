@@ -31,3 +31,20 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Claude Code ###
+# Personal, machine-specific settings (permissions, env, local hooks).
+# The rest of .claude/ (CLAUDE.md, rules, hooks, skills, commands) is committed and shared.
+.claude/settings.local.json
+
+### Spring Boot ###
+# Runtime log output.
+*.log
+logs/
+# Local config overrides — may hold real DB passwords/secrets, never commit.
+application-local.properties
+application-*.local.properties
+
+### OS ###
+.DS_Store
+Thumbs.db
