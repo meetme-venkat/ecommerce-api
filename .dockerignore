@@ -1,0 +1,25 @@
+# Build output (the image builds its own jar from source)
+target/
+
+# Version control & CI
+.git/
+.gitignore
+.gitattributes
+
+# Claude Code config, skills, and eval workspace — never needed in the image
+.claude/
+
+# IDE / editor
+.idea/
+.vscode/
+*.iml
+
+# Docs & local-only files
+db/
+HELP.md
+*.log
+logs/
+
+# OS cruft
+.DS_Store
+Thumbs.db
