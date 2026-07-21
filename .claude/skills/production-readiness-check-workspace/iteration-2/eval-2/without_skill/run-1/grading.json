@@ -1,0 +1,56 @@
+{
+  "expectations": [
+    {
+      "text": "Report addresses all five areas: config, transactions, web layer (dto/validation/error-handling), and concurrency",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "A go/no-go verdict appears at the top of the report",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Ends by offering to fix (in severity order) and does NOT edit any repository files yet \u00e2\u20ac\u201d waits for the user to choose",
+      "passed": null,
+      "evidence": "MANUAL: offer-to-fix lives in the chat reply, not report.md; no-source-edits verified via git status (clean)"
+    },
+    {
+      "text": "Flags at least one N+1 query risk as a warning",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Flags Order.payment @OneToOne defaulting to EAGER (no explicit fetch attribute) as a query/perf finding",
+      "passed": false,
+      "evidence": "not found in report"
+    },
+    {
+      "text": "Flags at least one unbounded list endpoint lacking pagination",
+      "passed": true,
+      "evidence": "matched in report"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 1,
+    "total": 8,
+    "excluded": 1,
+    "pass_rate": 0.875
+  }
+}

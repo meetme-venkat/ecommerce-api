@@ -1,0 +1,423 @@
+{
+  "metadata": {
+    "skill_name": "production-readiness-check",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-07-20T03:45:37Z",
+    "evals_run": [
+      0,
+      1,
+      2
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 317.8,
+        "tokens": 95628,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Gives a clear NOT READY / no-go verdict prominently (not a hedge)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Every finding cites a concrete file:line location",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Findings are grouped by severity (critical / warning / info)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Does NOT wrongly flag ddl-auto=validate as a production risk (validate is correct for prod)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Credits at least one genuinely clean area as passed (DTO boundary, @Transactional coverage, or input validation)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+          "passed": true,
+          "evidence": "matched in report"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 249.8,
+        "tokens": 81040,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Produces a structured severity-graded readiness report (recognizes the intent despite no explicit 'production readiness' phrase)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Lays out what to fix first, ordered by severity (criticals before warnings)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Every finding cites a concrete file:line location",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Does NOT wrongly flag ddl-auto=validate as a production risk (validate is correct for prod)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Flags that customerId is supplied by the client in the request body (IDOR / trusting client identity)",
+          "passed": true,
+          "evidence": "matched in report"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 364.5,
+        "tokens": 98726,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Report addresses all five areas: config, transactions, web layer (dto/validation/error-handling), and concurrency",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "A go/no-go verdict appears at the top of the report",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Ends by offering to fix (in severity order) and does NOT edit any repository files yet \u00e2\u20ac\u201d waits for the user to choose",
+          "passed": null,
+          "evidence": "MANUAL: offer-to-fix lives in the chat reply, not report.md; no-source-edits verified via git status (clean)"
+        },
+        {
+          "text": "Flags at least one N+1 query risk as a warning",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Flags Order.payment @OneToOne defaulting to EAGER (no explicit fetch attribute) as a query/perf finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Flags at least one unbounded list endpoint lacking pagination",
+          "passed": true,
+          "evidence": "matched in report"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.875,
+        "passed": 7,
+        "failed": 1,
+        "total": 8,
+        "time_seconds": 435.8,
+        "tokens": 76641,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Gives a clear NOT READY / no-go verdict prominently (not a hedge)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Every finding cites a concrete file:line location",
+          "passed": false,
+          "evidence": "not found in report"
+        },
+        {
+          "text": "Findings are grouped by severity (critical / warning / info)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Does NOT wrongly flag ddl-auto=validate as a production risk (validate is correct for prod)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Credits at least one genuinely clean area as passed (DTO boundary, @Transactional coverage, or input validation)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+          "passed": true,
+          "evidence": "matched in report"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 6,
+        "failed": 2,
+        "total": 8,
+        "time_seconds": 417.9,
+        "tokens": 83708,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Produces a structured severity-graded readiness report (recognizes the intent despite no explicit 'production readiness' phrase)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Lays out what to fix first, ordered by severity (criticals before warnings)",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Every finding cites a concrete file:line location",
+          "passed": false,
+          "evidence": "not found in report"
+        },
+        {
+          "text": "Does NOT wrongly flag ddl-auto=validate as a production risk (validate is correct for prod)",
+          "passed": false,
+          "evidence": "not found in report"
+        },
+        {
+          "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Flags that customerId is supplied by the client in the request body (IDOR / trusting client identity)",
+          "passed": true,
+          "evidence": "matched in report"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.875,
+        "passed": 7,
+        "failed": 1,
+        "total": 8,
+        "time_seconds": 326.2,
+        "tokens": 75662,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Report addresses all five areas: config, transactions, web layer (dto/validation/error-handling), and concurrency",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the blank Postgres datasource password as a critical config finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "A go/no-go verdict appears at the top of the report",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Ends by offering to fix (in severity order) and does NOT edit any repository files yet \u00e2\u20ac\u201d waits for the user to choose",
+          "passed": null,
+          "evidence": "MANUAL: offer-to-fix lives in the chat reply, not report.md; no-source-edits verified via git status (clean)"
+        },
+        {
+          "text": "Flags at least one N+1 query risk as a warning",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+          "passed": true,
+          "evidence": "matched in report"
+        },
+        {
+          "text": "Flags Order.payment @OneToOne defaulting to EAGER (no explicit fetch attribute) as a query/perf finding",
+          "passed": false,
+          "evidence": "not found in report"
+        },
+        {
+          "text": "Flags at least one unbounded list endpoint lacking pagination",
+          "passed": true,
+          "evidence": "matched in report"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 310.7,
+        "stddev": 57.6787,
+        "min": 249.8,
+        "max": 364.5
+      },
+      "tokens": {
+        "mean": 91798.0,
+        "stddev": 9444.5923,
+        "min": 81040,
+        "max": 98726
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.8333,
+        "stddev": 0.0722,
+        "min": 0.75,
+        "max": 0.875
+      },
+      "time_seconds": {
+        "mean": 393.3,
+        "stddev": 58.7955,
+        "min": 326.2,
+        "max": 435.8
+      },
+      "tokens": {
+        "mean": 78670.3333,
+        "stddev": 4390.1224,
+        "min": 75662,
+        "max": 83708
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.17",
+      "time_seconds": "-82.6",
+      "tokens": "+13128"
+    }
+  },
+  "notes": []
+}

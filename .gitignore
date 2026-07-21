@@ -48,3 +48,7 @@ application-*.local.properties
 ### OS ###
 .DS_Store
 Thumbs.db
+
+### Python (skill eval tooling) ###
+__pycache__/
+*.pyc

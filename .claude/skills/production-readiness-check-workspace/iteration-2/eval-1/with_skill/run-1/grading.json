@@ -1,0 +1,51 @@
+{
+  "expectations": [
+    {
+      "text": "Produces a structured severity-graded readiness report (recognizes the intent despite no explicit 'production readiness' phrase)",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Lays out what to fix first, ordered by severity (criticals before warnings)",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Every finding cites a concrete file:line location",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Does NOT wrongly flag ddl-auto=validate as a production risk (validate is correct for prod)",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Flags that customerId is supplied by the client in the request body (IDOR / trusting client identity)",
+      "passed": true,
+      "evidence": "matched in report"
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "excluded": 0,
+    "pass_rate": 1.0
+  }
+}

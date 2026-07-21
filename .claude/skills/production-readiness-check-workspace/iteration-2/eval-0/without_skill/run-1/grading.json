@@ -1,0 +1,51 @@
+{
+  "expectations": [
+    {
+      "text": "Gives a clear NOT READY / no-go verdict prominently (not a hedge)",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Every finding cites a concrete file:line location",
+      "passed": false,
+      "evidence": "not found in report"
+    },
+    {
+      "text": "Findings are grouped by severity (critical / warning / info)",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Does NOT wrongly flag ddl-auto=validate as a production risk (validate is correct for prod)",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Credits at least one genuinely clean area as passed (DTO boundary, @Transactional coverage, or input validation)",
+      "passed": true,
+      "evidence": "matched in report"
+    },
+    {
+      "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+      "passed": true,
+      "evidence": "matched in report"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 1,
+    "total": 8,
+    "excluded": 0,
+    "pass_rate": 0.875
+  }
+}

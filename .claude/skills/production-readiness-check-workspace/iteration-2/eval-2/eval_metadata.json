@@ -1,0 +1,43 @@
+{
+  "eval_id": 2,
+  "eval_name": "hardening-review-then-fix",
+  "prompt": "Do a hardening pass over this Spring Boot API before release \u00e2\u20ac\u201d config, transactions, the web layer, concurrency, all of it. Give me the report first, then I'll tell you what to fix.",
+  "assertions": [
+    {
+      "text": "Report addresses all five areas: config, transactions, web layer (dto/validation/error-handling), and concurrency",
+      "type": "qualitative"
+    },
+    {
+      "text": "Identifies the blank Postgres datasource password as a critical config finding",
+      "type": "qualitative"
+    },
+    {
+      "text": "Identifies the unguarded stock read-check-write oversell race in OrderService.create as a critical concurrency finding",
+      "type": "qualitative"
+    },
+    {
+      "text": "A go/no-go verdict appears at the top of the report",
+      "type": "qualitative"
+    },
+    {
+      "text": "Ends by offering to fix (in severity order) and does NOT edit any repository files yet \u00e2\u20ac\u201d waits for the user to choose",
+      "type": "qualitative"
+    },
+    {
+      "text": "Flags at least one N+1 query risk as a warning",
+      "type": "qualitative"
+    },
+    {
+      "text": "Identifies the complete absence of authentication/authorization on all endpoints as a critical finding",
+      "type": "qualitative"
+    },
+    {
+      "text": "Flags Order.payment @OneToOne defaulting to EAGER (no explicit fetch attribute) as a query/perf finding",
+      "type": "qualitative"
+    },
+    {
+      "text": "Flags at least one unbounded list endpoint lacking pagination",
+      "type": "qualitative"
+    }
+  ]
+}
