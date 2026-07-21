@@ -45,6 +45,10 @@ logs/
 application-local.properties
 application-*.local.properties
 
+### Docker / local stack secrets ###
+# Real .env holds DB credentials; only .env.example (placeholders) is committed.
+.env
+
 ### OS ###
 .DS_Store
 Thumbs.db

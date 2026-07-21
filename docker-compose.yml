@@ -1,0 +1,50 @@
+name: ecommerce-api
+
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    # Secrets (db name, user, password) live in .env — never inline here.
+    env_file:
+      - .env
+    ports:
+      # Host 5430 avoids clashing with a local PostgreSQL on 5432.
+      # Containers still talk to it on the internal network port 5432.
+      - "5430:5432"
+    volumes:
+      # Postgres 18+ images store data in a version subdir under this path;
+      # mount the volume here (not .../data) per the image's own guidance.
+      - pgdata:/var/lib/postgresql
+      # Canonical schema mounted read-only; loaded by the init wrapper below.
+      - ./db/schema.sql:/schema/schema.sql:ro
+      - ./db/init/00-load-schema.sh:/docker-entrypoint-initdb.d/00-load-schema.sh:ro
+    healthcheck:
+      # $$ escapes compose interpolation so the vars resolve inside the container.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        # Wait until Postgres is accepting connections AND the schema init has
+        # finished — the image only opens the TCP port after init scripts run.
+        condition: service_healthy
+    environment:
+      # Point Spring at the postgres service; values are interpolated from .env,
+      # so no secret literal appears in this file.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
+    # The container's own HEALTHCHECK (curl /actuator/health) is defined in the Dockerfile.
+
+volumes:
+  pgdata:
