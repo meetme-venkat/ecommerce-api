@@ -34,6 +34,11 @@ public class ProductService {
         return toResponse(getProduct(id));
     }
 
+    @Transactional(readOnly = true)
+    public long count() {
+        return productRepository.count();
+    }
+
     @Transactional
     public ProductResponse create(ProductRequest request) {
         if (productRepository.findBySku(request.getSku()).isPresent()) {

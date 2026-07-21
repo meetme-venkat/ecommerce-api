@@ -31,6 +31,11 @@ public class ProductController {
         return productService.findAll();
     }
 
+    @GetMapping("/count")
+    public long count() {
+        return productService.count();
+    }
+
     @GetMapping("/{id}")
     public ProductResponse findById(@PathVariable Long id) {
         return productService.findById(id);
