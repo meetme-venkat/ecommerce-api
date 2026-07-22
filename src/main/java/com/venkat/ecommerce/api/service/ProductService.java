@@ -9,6 +9,7 @@ import com.venkat.ecommerce.api.exception.ResourceNotFoundException;
 import com.venkat.ecommerce.api.repository.CategoryRepository;
 import com.venkat.ecommerce.api.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ProductService {
 
@@ -41,6 +43,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponse create(ProductRequest request) {
+        log.info("Creating product with sku={}", request.getSku());
         if (productRepository.findBySku(request.getSku()).isPresent()) {
             throw new DuplicateResourceException("Product", "sku", request.getSku());
         }
@@ -57,11 +60,14 @@ public class ProductService {
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
-        return toResponse(productRepository.save(product));
+        Product saved = productRepository.save(product);
+        log.info("Created product id={}", saved.getId());
+        return toResponse(saved);
     }
 
     @Transactional
     public ProductResponse update(Long id, ProductRequest request) {
+        log.info("Updating product id={}", id);
         Product product = getProduct(id);
         productRepository.findBySku(request.getSku())
                 .filter(existing -> !existing.getId().equals(id))
@@ -84,6 +90,7 @@ public class ProductService {
 
     @Transactional
     public void delete(Long id) {
+        log.info("Deleting product id={}", id);
         Product product = getProduct(id);
         productRepository.delete(product);
     }

@@ -68,6 +68,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponse create(CreateOrderRequest request) {
+        log.info("Creating order for customerId={}", request.getCustomerId());
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Customer", request.getCustomerId()));
 
@@ -129,11 +130,14 @@ public class OrderService {
                 .build();
         order.setPayment(payment);
 
-        return toResponse(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+        log.info("Created order id={} orderNumber={}", saved.getId(), saved.getOrderNumber());
+        return toResponse(saved);
     }
 
     @Transactional
     public OrderResponse updateStatus(Long id, OrderStatus target) {
+        log.info("Updating order id={} to status={}", id, target);
         Order order = getOrder(id);
         OrderStatus current = order.getStatus();
 
@@ -154,6 +158,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponse cancel(Long id) {
+        log.info("Cancelling order id={}", id);
         Order order = getOrder(id);
         OrderStatus current = order.getStatus();
 

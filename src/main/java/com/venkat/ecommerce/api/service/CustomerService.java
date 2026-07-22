@@ -7,6 +7,7 @@ import com.venkat.ecommerce.api.exception.DuplicateResourceException;
 import com.venkat.ecommerce.api.exception.ResourceNotFoundException;
 import com.venkat.ecommerce.api.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class CustomerService {
 
@@ -33,6 +35,7 @@ public class CustomerService {
 
     @Transactional
     public CustomerResponse create(CustomerRequest request) {
+        log.info("Creating customer with email={}", request.getEmail());
         if (customerRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateResourceException("Customer", "email", request.getEmail());
         }
@@ -44,11 +47,14 @@ public class CustomerService {
                 .address(request.getAddress())
                 .createdAt(LocalDateTime.now())
                 .build();
-        return toResponse(customerRepository.save(customer));
+        Customer saved = customerRepository.save(customer);
+        log.info("Created customer id={}", saved.getId());
+        return toResponse(saved);
     }
 
     @Transactional
     public CustomerResponse update(Long id, CustomerRequest request) {
+        log.info("Updating customer id={}", id);
         Customer customer = getCustomer(id);
         customerRepository.findByEmail(request.getEmail())
                 .filter(existing -> !existing.getId().equals(id))
@@ -65,6 +71,7 @@ public class CustomerService {
 
     @Transactional
     public void delete(Long id) {
+        log.info("Deleting customer id={}", id);
         Customer customer = getCustomer(id);
         customerRepository.delete(customer);
     }

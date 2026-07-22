@@ -7,6 +7,7 @@ import com.venkat.ecommerce.api.exception.DuplicateResourceException;
 import com.venkat.ecommerce.api.exception.ResourceNotFoundException;
 import com.venkat.ecommerce.api.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class CategoryService {
 
@@ -33,6 +35,7 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
+        log.info("Creating category with name={}", request.getName());
         if (categoryRepository.findByName(request.getName()).isPresent()) {
             throw new DuplicateResourceException("Category", "name", request.getName());
         }
@@ -47,11 +50,14 @@ public class CategoryService {
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
-        return toResponse(categoryRepository.save(category));
+        Category saved = categoryRepository.save(category);
+        log.info("Created category id={}", saved.getId());
+        return toResponse(saved);
     }
 
     @Transactional
     public CategoryResponse update(Long id, CategoryRequest request) {
+        log.info("Updating category id={}", id);
         Category category = getCategory(id);
         categoryRepository.findByName(request.getName())
                 .filter(existing -> !existing.getId().equals(id))
@@ -72,6 +78,7 @@ public class CategoryService {
 
     @Transactional
     public void delete(Long id) {
+        log.info("Deleting category id={}", id);
         Category category = getCategory(id);
         categoryRepository.delete(category);
     }

@@ -10,6 +10,7 @@ import com.venkat.ecommerce.api.repository.CustomerRepository;
 import com.venkat.ecommerce.api.repository.ProductRepository;
 import com.venkat.ecommerce.api.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ReviewService {
 
@@ -26,6 +28,7 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponse create(Long productId, CreateReviewRequest request) {
+        log.info("Creating review for productId={} by customerId={}", productId, request.getCustomerId());
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
         Customer customer = customerRepository.findById(request.getCustomerId())
@@ -39,7 +42,9 @@ public class ReviewService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return toResponse(reviewRepository.save(review));
+        Review saved = reviewRepository.save(review);
+        log.info("Created review id={}", saved.getId());
+        return toResponse(saved);
     }
 
     @Transactional(readOnly = true)
