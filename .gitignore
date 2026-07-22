@@ -45,9 +45,9 @@ logs/
 application-local.properties
 application-*.local.properties
 
-### Docker / local stack secrets ###
-# Real .env holds DB credentials; only .env.example (placeholders) is committed.
-.env
+### Docker / local stack ###
+# .env is committed (tracked) so `docker compose up` works right after clone.
+# Holds local-dev-only placeholder credentials — never put real/prod secrets here.
 
 ### OS ###
 .DS_Store
