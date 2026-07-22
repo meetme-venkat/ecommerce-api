@@ -1,0 +1,30 @@
+<configuration>
+
+    <!-- Default values are used when variables aren't supplied -->
+    <property name="LOG_PATH" value="${LOG_PATH:-/app/logs}"/>
+    <property name="LOG_FILE_NAME" value="${LOG_FILE_NAME:-application}"/>
+
+    <appender name="DAILY_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+
+            <!-- One dynamically named file per day -->
+            <fileNamePattern>
+                ${LOG_PATH}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="DAILY_FILE"/>
+    </root>
+
+</configuration>

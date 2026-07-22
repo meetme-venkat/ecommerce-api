@@ -42,6 +42,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      LOG_PATH: ${LOG_PATH}
+      LOG_FILE_NAME: ${LOG_FILE_NAME}
+    volumes:
+      - "${HOST_LOG_PATH}:${LOG_PATH}"  
     ports:
       - "8080:8080"
     # The container's own HEALTHCHECK (curl /actuator/health) is defined in the Dockerfile.
