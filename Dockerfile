@@ -44,6 +44,11 @@ WORKDIR /app
 # non-root user. Only the artifact crosses stages — no build tooling or sources.
 COPY --from=build --chown=spring:spring /build/target/ecommerce-api-*.jar app.jar
 
+# Default log dir logback-spring.xml falls back to when LOG_PATH isn't set
+# (e.g. orchestrators that build this image without mounting a log volume).
+# Must be writable by the non-root runtime user, not just root-owned WORKDIR.
+RUN mkdir -p /app/logs && chown -R spring:spring /app/logs
+
 USER spring
 
 EXPOSE 8080
